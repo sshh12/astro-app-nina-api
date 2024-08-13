@@ -39,10 +39,10 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyMetadata("Homepage", "https://github.com/sshh12/astro-app-nina-api")]
 
 //[Optional] Common tags that quickly describe your plugin
-[assembly: AssemblyMetadata("Tags", "")]
+[assembly: AssemblyMetadata("Tags", "HTTP, API, Websockets")]
 
 //[Optional] A link that will show a log of all changes in between your plugin's versions
-[assembly: AssemblyMetadata("ChangelogURL", "https://github.com/sshh12/astro-app-nina-api/CHANGELOG.md")]
+[assembly: AssemblyMetadata("ChangelogURL", "https://github.com/sshh12/astro-app-nina-api/commits/main/")]
 
 //[Optional] The url to a featured logo that will be displayed in the plugin list next to the name
 [assembly: AssemblyMetadata("FeaturedImageURL", "")]
