@@ -63,7 +63,7 @@ namespace Plugin.NINA.AstroAppHTTPAPI.AstroAppHttpApiTestCategory {
         /// </remarks>
         [ImportingConstructor]
         public AstroAppHttpApiInstruction() {
-            Text = Settings.Default.DefaultNotificationMessage;
+            Text = Settings.Default.ApiKey;
         }
         public AstroAppHttpApiInstruction(AstroAppHttpApiInstruction copyMe) : this() {
             CopyMetaData(copyMe);
