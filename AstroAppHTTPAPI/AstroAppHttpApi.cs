@@ -1,10 +1,12 @@
 ﻿using NINA.Core.Utility;
 using NINA.Core.Utility.Notification;
+using NINA.Equipment.Interfaces.Mediator;
 using NINA.Plugin;
 using NINA.Plugin.Interfaces;
 using NINA.Profile;
 using NINA.Profile.Interfaces;
 using NINA.WPF.Base.Interfaces.ViewModel;
+using Plugin.NINA.AstroAppHTTPAPI.Equipment;
 using Plugin.NINA.AstroAppHTTPAPI.Web;
 using System;
 using System.ComponentModel;
@@ -20,12 +22,13 @@ namespace Plugin.NINA.AstroAppHTTPAPI {
         private readonly IPluginOptionsAccessor pluginSettings;
         private readonly IProfileService profileService;
         private static WebServerManager serverManager;
+        private EquipmentManager equipmentManager;
 
         public RelayCommand RestartServerCommand { get; set; }
 
 
         [ImportingConstructor]
-        public AstroAppHttpApi(IProfileService profileService, IOptionsVM options) {
+        public AstroAppHttpApi(IProfileService profileService, IOptionsVM options, ICameraMediator camera) {
             if (Settings.Default.UpdateSettings) {
                 Settings.Default.Upgrade();
                 Settings.Default.UpdateSettings = false;
@@ -38,7 +41,10 @@ namespace Plugin.NINA.AstroAppHTTPAPI {
                 ApiKey = GenerateRandomKey();
             }
 
-            serverManager = new WebServerManager(Port);
+            equipmentManager = new EquipmentManager {
+                Camera = camera
+            };
+            serverManager = new WebServerManager(Port, equipmentManager);
 
             if (WebServerEnabled) {
                 serverManager.Start();

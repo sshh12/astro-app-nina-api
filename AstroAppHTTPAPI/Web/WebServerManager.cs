@@ -1,5 +1,7 @@
 ﻿using EmbedIO;
+using EmbedIO.WebApi;
 using NINA.Core.Utility.Notification;
+using Plugin.NINA.AstroAppHTTPAPI.Equipment;
 using System;
 using System.Threading;
 
@@ -10,15 +12,18 @@ namespace Plugin.NINA.AstroAppHTTPAPI.Web {
         private Thread serverThread;
         private WebServer Server;
         private int port;
+        private EquipmentManager equipmentManager;
 
-        public WebServerManager(int port) {
+        public WebServerManager(int port, EquipmentManager equipmentManager) {
             this.port = port;
+            this.equipmentManager = equipmentManager;
         }
 
         private void CreateServer() {
             Server = new WebServer(o => o
                 .WithUrlPrefix($"http://*:{port}")
-                .WithMode(HttpListenerMode.EmbedIO));
+                .WithMode(HttpListenerMode.EmbedIO))
+                .WithWebApi("/api/v1", m => m.WithController(() => new RouteController(null, equipmentManager)));
         }
 
         public void Start() {
@@ -41,7 +46,7 @@ namespace Plugin.NINA.AstroAppHTTPAPI.Web {
                 Server = null;
                 Notification.ShowSuccess("Web server stopped");
             } catch (Exception ex) {
-                Notification.ShowError("Failed to stop web server, see NINA log for details");
+                Notification.ShowError($"Failed to stop web server {ex}");
             }
         }
 
@@ -55,10 +60,10 @@ namespace Plugin.NINA.AstroAppHTTPAPI.Web {
         [STAThread]
         private void RunServerTask(WebServer server) {
             try {
-                Notification.ShowSuccess("Web server started, listening at:");
+                Notification.ShowSuccess($"Web server started, listening at //:{Port}");
                 server.RunAsync().Wait();
             } catch (Exception ex) {
-                Notification.ShowError("Failed to start web server, see NINA log for details");
+                Notification.ShowError($"Failed to start web server {ex}");
             }
         }
 
