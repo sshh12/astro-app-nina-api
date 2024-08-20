@@ -1,9 +1,11 @@
 ﻿using NINA.Core.Utility;
+using NINA.Core.Utility.Notification;
 using NINA.Plugin;
 using NINA.Plugin.Interfaces;
 using NINA.Profile;
 using NINA.Profile.Interfaces;
 using NINA.WPF.Base.Interfaces.ViewModel;
+using Plugin.NINA.AstroAppHTTPAPI.Web;
 using System;
 using System.ComponentModel;
 using System.ComponentModel.Composition;
@@ -17,6 +19,10 @@ namespace Plugin.NINA.AstroAppHTTPAPI {
         public event PropertyChangedEventHandler PropertyChanged;
         private readonly IPluginOptionsAccessor pluginSettings;
         private readonly IProfileService profileService;
+        private static WebServerManager serverManager;
+
+        public RelayCommand RestartServerCommand { get; set; }
+
 
         [ImportingConstructor]
         public AstroAppHttpApi(IProfileService profileService, IOptionsVM options) {
@@ -25,19 +31,31 @@ namespace Plugin.NINA.AstroAppHTTPAPI {
                 Settings.Default.UpdateSettings = false;
                 CoreUtil.SaveSettings(Settings.Default);
             }
-            this.pluginSettings = new PluginOptionsAccessor(profileService, Guid.Parse(this.Identifier));
+            pluginSettings = new PluginOptionsAccessor(profileService, Guid.Parse(Identifier));
             this.profileService = profileService;
 
             if (string.IsNullOrEmpty(ApiKey)) {
                 ApiKey = GenerateRandomKey();
             }
 
+            serverManager = new WebServerManager(Port);
+
             if (WebServerEnabled) {
-                Logger.Info("Running Webserver");
+                serverManager.Start();
             }
+
+            RestartServerCommand = new RelayCommand((obj) => {
+                if (WebServerEnabled) {
+                    serverManager.Stop();
+                    serverManager.Start();
+                } else {
+                    Notification.ShowError("Start the server first!");
+                }
+            });
         }
 
         public override Task Teardown() {
+            serverManager.Stop();
             return base.Teardown();
         }
 
@@ -68,6 +86,7 @@ namespace Plugin.NINA.AstroAppHTTPAPI {
                 Settings.Default.Port = value;
                 CoreUtil.SaveSettings(Settings.Default);
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Port)));
+                serverManager.Port = value;
             }
         }
 
@@ -77,6 +96,11 @@ namespace Plugin.NINA.AstroAppHTTPAPI {
                 Settings.Default.WebServerEnabled = value;
                 CoreUtil.SaveSettings(Settings.Default);
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(WebServerEnabled)));
+                if (value) {
+                    serverManager.Start();
+                } else {
+                    serverManager.Stop();
+                }
             }
         }
 
