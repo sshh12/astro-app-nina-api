@@ -25,13 +25,13 @@ namespace Plugin.NINA.AstroAppHTTPAPI.Web {
         }
 
         private void CreateServer() {
-            webSocketHandler = new WebSocketHandler("/events/v1", equipmentManager);
+            webSocketHandler = new WebSocketHandler("/events/v1", equipmentManager, apiKey);
             server = new WebServer(o => o
                 .WithUrlPrefix($"http://*:{port}")
                 .WithMode(HttpListenerMode.EmbedIO))
+                .WithModule(webSocketHandler)
                 .WithModule(new BasicAuthenticationModule("/").WithAccount("user", apiKey))
-                .WithWebApi("/api/v1/camera", m => m.WithController(() => new CameraRouteController(null, equipmentManager)))
-                .WithModule(webSocketHandler);
+                .WithWebApi("/api/v1/camera", m => m.WithController(() => new CameraRouteController(null, equipmentManager)));
         }
 
         public void Start() {
