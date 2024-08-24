@@ -2,6 +2,7 @@
 using EmbedIO.Routing;
 using EmbedIO.WebApi;
 using Plugin.NINA.AstroAppHTTPAPI.Equipment;
+using System.Threading.Tasks;
 
 namespace Plugin.NINA.AstroAppHTTPAPI.Web {
     public class RouteController : WebApiController {
@@ -18,8 +19,8 @@ namespace Plugin.NINA.AstroAppHTTPAPI.Web {
         }
 
         [Route(HttpVerbs.Get, "/connect")]
-        public string ConnectCamera() {
-            equipmentManager.Camera.Connect();
+        public async Task<string> ConnectCamera() {
+            await equipmentManager.ConnectCamera();
             return "done";
         }
 

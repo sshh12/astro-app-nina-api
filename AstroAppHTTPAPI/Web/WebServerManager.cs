@@ -4,15 +4,17 @@ using NINA.Core.Utility.Notification;
 using Plugin.NINA.AstroAppHTTPAPI.Equipment;
 using System;
 using System.Threading;
+using System.Timers;
 
 namespace Plugin.NINA.AstroAppHTTPAPI.Web {
 
-
     public class WebServerManager {
         private Thread serverThread;
-        private WebServer Server;
+        private WebServer server;
+        private WebSocketHandler webSocketHandler;
         private int port;
         private EquipmentManager equipmentManager;
+        private System.Timers.Timer statusTimer;
 
         public WebServerManager(int port, EquipmentManager equipmentManager) {
             this.port = port;
@@ -20,30 +22,37 @@ namespace Plugin.NINA.AstroAppHTTPAPI.Web {
         }
 
         private void CreateServer() {
-            Server = new WebServer(o => o
+            webSocketHandler = new WebSocketHandler("/events/v1", equipmentManager);
+            server = new WebServer(o => o
                 .WithUrlPrefix($"http://*:{port}")
                 .WithMode(HttpListenerMode.EmbedIO))
-                .WithWebApi("/api/v1", m => m.WithController(() => new RouteController(null, equipmentManager)));
+                .WithWebApi("/api/v1", m => m.WithController(() => new RouteController(null, equipmentManager)))
+                .WithModule(webSocketHandler);
         }
 
         public void Start() {
-            if (Server != null) {
+            if (server != null) {
                 return;
             }
             CreateServer();
-            serverThread = new Thread(() => RunServerTask(Server));
+            serverThread = new Thread(() => RunServerTask(server));
             serverThread.Name = "WebServerThread";
             serverThread.SetApartmentState(ApartmentState.STA);
             serverThread.Start();
+            statusTimer = new System.Timers.Timer(10000);
+            statusTimer.Elapsed += OnStatusTimerElapsed;
+            statusTimer.Start();
         }
 
         public void Stop() {
-            if (Server == null) {
+            if (server == null) {
                 return;
             }
             try {
-                Server?.Dispose();
-                Server = null;
+                server?.Dispose();
+                server = null;
+                statusTimer.Stop();
+                statusTimer = null;
                 Notification.ShowSuccess("Web server stopped");
             } catch (Exception ex) {
                 Notification.ShowError($"Failed to stop web server {ex}");
@@ -51,7 +60,7 @@ namespace Plugin.NINA.AstroAppHTTPAPI.Web {
         }
 
         public void Restart() {
-            if (Server != null) {
+            if (server != null) {
                 Stop();
             }
             Start();
@@ -67,11 +76,15 @@ namespace Plugin.NINA.AstroAppHTTPAPI.Web {
             }
         }
 
+        private void OnStatusTimerElapsed(object sender, ElapsedEventArgs e) {
+            webSocketHandler.PostStatus();
+        }
+
         public int Port {
             get => port;
             set {
                 port = value;
-                if (Server != null) {
+                if (server != null) {
                     Restart();
                 }
             }
