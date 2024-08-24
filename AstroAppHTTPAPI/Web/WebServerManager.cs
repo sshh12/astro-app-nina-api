@@ -30,7 +30,7 @@ namespace Plugin.NINA.AstroAppHTTPAPI.Web {
                 .WithUrlPrefix($"http://*:{port}")
                 .WithMode(HttpListenerMode.EmbedIO))
                 .WithModule(new BasicAuthenticationModule("/").WithAccount("user", apiKey))
-                .WithWebApi("/api/v1", m => m.WithController(() => new RouteController(null, equipmentManager)))
+                .WithWebApi("/api/v1/camera", m => m.WithController(() => new CameraRouteController(null, equipmentManager)))
                 .WithModule(webSocketHandler);
         }
 
