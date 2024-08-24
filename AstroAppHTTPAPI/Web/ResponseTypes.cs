@@ -1,4 +1,5 @@
 ﻿using NINA.Equipment.Equipment.MyCamera;
+using Plugin.NINA.AstroAppHTTPAPI.Equipment;
 using System;
 
 namespace Plugin.NINA.AstroAppHTTPAPI.Web {
@@ -34,8 +35,11 @@ namespace Plugin.NINA.AstroAppHTTPAPI.Web {
         public int XSize { get; set; }
         public int YSize { get; set; }
         public string SensorType { get; set; }
+        public string Action { get; set; }
 
-        public static CameraStatusResponse FromCameraInfo(CameraInfo info) {
+
+
+        public static CameraStatusResponse FromCameraInfo(CameraInfo info, CameraAction action) {
             return new CameraStatusResponse {
                 Name = info.Name,
                 Description = info.Description,
@@ -50,7 +54,8 @@ namespace Plugin.NINA.AstroAppHTTPAPI.Web {
                 BinY = info.BinY,
                 XSize = info.XSize,
                 YSize = info.YSize,
-                SensorType = info.SensorType.ToString()
+                SensorType = info.SensorType.ToString(),
+                Action = action.ToString(),
             };
         }
 

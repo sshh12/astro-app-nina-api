@@ -12,20 +12,20 @@ namespace Plugin.NINA.AstroAppHTTPAPI.Web {
         public WebSocketHandler(string urlPath, EquipmentManager equipmentManager)
             : base(urlPath, true) {
             this.equipmentManager = equipmentManager;
-            this.equipmentManager.CameraUpdated += (object sender, System.EventArgs e) => PostCameraStatus();
+            this.equipmentManager.CameraUpdated += (object sender, CameraEventArgs e) => PostCameraStatus(e);
             jsonSettings = new JsonSerializerSettings {
                 NullValueHandling = NullValueHandling.Include
             };
         }
 
-        private void PostCameraStatus() {
+        private void PostCameraStatus(CameraEventArgs e) {
             var info = equipmentManager.CameraInfo();
-            var response = CameraStatusResponse.FromCameraInfo(info);
+            var response = CameraStatusResponse.FromCameraInfo(info, e.Action);
             BroadcastAsync(JsonConvert.SerializeObject(response, jsonSettings));
         }
 
         public void PostStatus() {
-            PostCameraStatus();
+            PostCameraStatus(new CameraEventArgs(CameraAction.NONE));
         }
 
         protected override Task OnMessageReceivedAsync(

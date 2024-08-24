@@ -21,7 +21,7 @@ namespace Plugin.NINA.AstroAppHTTPAPI.Web {
         [Route(HttpVerbs.Get, "/")]
         public string CameraStatus() {
             var info = equipmentManager.CameraInfo();
-            var response = CameraStatusResponse.FromCameraInfo(info);
+            var response = CameraStatusResponse.FromCameraInfo(info, CameraAction.NONE);
             return JsonConvert.SerializeObject(response, jsonSettings);
         }
 
@@ -48,9 +48,9 @@ namespace Plugin.NINA.AstroAppHTTPAPI.Web {
 
         [Route(HttpVerbs.Patch, "/binning")]
         public async Task<string> CameraSetBinning([JsonData] CameraBinningRequest request) {
-            await equipmentManager.CameraSetBinning(request.x, request.y);
+            await equipmentManager.CameraSetBinning(request.X, request.Y);
             var info = equipmentManager.CameraInfo();
-            var response = CameraStatusResponse.FromCameraInfo(info);
+            var response = CameraStatusResponse.FromCameraInfo(info, CameraAction.BINNING_UPDATED);
             return JsonConvert.SerializeObject(response, jsonSettings);
         }
     }
