@@ -1,89 +1,75 @@
 ﻿using EmbedIO;
 using EmbedIO.Routing;
 using EmbedIO.WebApi;
-using Newtonsoft.Json;
 using Plugin.NINA.AstroAppHTTPAPI.Equipment;
 using System.Threading.Tasks;
 
 namespace Plugin.NINA.AstroAppHTTPAPI.Web {
-    public class DomeRouteController : WebApiController {
+    public class DomeRouteController : DeviceRouteController {
 
-        private EquipmentManager equipmentManager;
-        private JsonSerializerSettings jsonSettings;
-
-        public DomeRouteController(IHttpContext context, EquipmentManager equipmentManager) {
-            this.equipmentManager = equipmentManager;
-            jsonSettings = new JsonSerializerSettings {
-                NullValueHandling = NullValueHandling.Include
-            };
-        }
+        public DomeRouteController(IHttpContext context, EquipmentManager equipmentManager) : base(context, equipmentManager) { }
 
         [Route(HttpVerbs.Get, "/")]
-        public string DomeStatus() {
+        public async Task DomeStatus() {
             var info = equipmentManager.DomeInfo();
             var response = DomeStatusResponse.FromDomeInfo(info, DomeAction.NONE);
-            return JsonConvert.SerializeObject(response, jsonSettings);
+            RespondWithJSON(response);
         }
 
         [Route(HttpVerbs.Post, "/connect")]
-        public async Task<string> DomeConnect() {
+        public async Task DomeConnect() {
             await equipmentManager.DomeConnect();
             var info = equipmentManager.DomeInfo();
-            var response = new DomeConnectedResponse {
-                Name = info.Name,
-                DeviceId = info.DeviceId,
-                Success = true,
-            };
-            return JsonConvert.SerializeObject(response, jsonSettings);
+            var response = DomeStatusResponse.FromDomeInfo(info, DomeAction.CONNECTED);
+            RespondWithJSON(response);
         }
 
         [Route(HttpVerbs.Post, "/disconnect")]
-        public async Task<string> DomeDisconnect() {
+        public async Task DomeDisconnect() {
             await equipmentManager.DomeDisconnect();
-            var response = new DomeDisconnectedResponse {
-                Success = true,
-            };
-            return JsonConvert.SerializeObject(response, jsonSettings);
+            var info = equipmentManager.DomeInfo();
+            var response = DomeStatusResponse.FromDomeInfo(info, DomeAction.DISCONNECTED);
+            RespondWithJSON(response);
         }
 
         [Route(HttpVerbs.Post, "/open")]
-        public async Task<string> DomeOpen() {
+        public async Task DomeOpen() {
             await equipmentManager.DomeSetShutterOpen(true);
             var info = equipmentManager.DomeInfo();
             var response = DomeStatusResponse.FromDomeInfo(info, DomeAction.OPENED);
-            return JsonConvert.SerializeObject(response, jsonSettings);
+            RespondWithJSON(response);
         }
 
         [Route(HttpVerbs.Post, "/close")]
-        public async Task<string> DomeClose() {
+        public async Task DomeClose() {
             await equipmentManager.DomeSetShutterOpen(false);
             var info = equipmentManager.DomeInfo();
             var response = DomeStatusResponse.FromDomeInfo(info, DomeAction.CLOSED);
-            return JsonConvert.SerializeObject(response, jsonSettings);
+            RespondWithJSON(response);
         }
 
         [Route(HttpVerbs.Post, "/rotate")]
-        public async Task<string> DomeSlew([JsonData] DomeSlewRequest request) {
+        public async Task DomeSlew([JsonData] DomeSlewRequest request) {
             await equipmentManager.DomeSlew(request.Azimuth);
             var info = equipmentManager.DomeInfo();
             var response = DomeStatusResponse.FromDomeInfo(info, DomeAction.SLEWED);
-            return JsonConvert.SerializeObject(response, jsonSettings);
+            RespondWithJSON(response);
         }
 
         [Route(HttpVerbs.Post, "/park")]
-        public async Task<string> DomePark() {
+        public async Task DomePark() {
             await equipmentManager.DomePark();
             var info = equipmentManager.DomeInfo();
             var response = DomeStatusResponse.FromDomeInfo(info, DomeAction.PARKED);
-            return JsonConvert.SerializeObject(response, jsonSettings);
+            RespondWithJSON(response);
         }
 
         [Route(HttpVerbs.Post, "/home")]
-        public async Task<string> DomeHome() {
+        public async Task DomeHome() {
             await equipmentManager.DomeFindHome();
             var info = equipmentManager.DomeInfo();
             var response = DomeStatusResponse.FromDomeInfo(info, DomeAction.HOMED);
-            return JsonConvert.SerializeObject(response, jsonSettings);
+            RespondWithJSON(response);
         }
     }
 }

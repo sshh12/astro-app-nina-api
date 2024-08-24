@@ -19,6 +19,7 @@ namespace Plugin.NINA.AstroAppHTTPAPI.Web {
             this.equipmentManager = equipmentManager;
             this.equipmentManager.CameraUpdated += async (object sender, CameraEventArgs e) => await PostCameraStatus(e);
             this.equipmentManager.DomeUpdated += async (object sender, DomeEventArgs e) => await PostDomeStatus(e);
+            this.equipmentManager.TelescopeUpdated += async (object sender, TelescopeEventArgs e) => await PostTelescopeStatus(e);
             this.apiKey = apiKey;
             jsonSettings = new JsonSerializerSettings {
                 NullValueHandling = NullValueHandling.Include
@@ -38,12 +39,22 @@ namespace Plugin.NINA.AstroAppHTTPAPI.Web {
             await BroadcastAuthedClientsAsync(JsonConvert.SerializeObject(response, jsonSettings));
         }
 
+        private async Task PostTelescopeStatus(TelescopeEventArgs e) {
+            var info = equipmentManager.TelescopeInfo();
+            var response = TelescopeStatusResponse.FromTelescopeInfo(info, e.Action);
+            await BroadcastAuthedClientsAsync(JsonConvert.SerializeObject(response, jsonSettings));
+        }
+
         public async Task BroadcastAuthedClientsAsync(string message) {
             await BroadcastAsync(message, (client) => authedClients.Contains(client.Id));
         }
 
         public void PostStatus() {
-            Task.WaitAll(PostCameraStatus(new CameraEventArgs(CameraAction.NONE)), PostDomeStatus(new DomeEventArgs(DomeAction.NONE)));
+            Task.WaitAll(
+                PostCameraStatus(new CameraEventArgs(CameraAction.NONE)),
+                PostDomeStatus(new DomeEventArgs(DomeAction.NONE)),
+                PostTelescopeStatus(new TelescopeEventArgs(TelescopeAction.NONE))
+            );
         }
 
         protected override async Task OnMessageReceivedAsync(
@@ -79,6 +90,11 @@ namespace Plugin.NINA.AstroAppHTTPAPI.Web {
             await SendAsync(context, JsonConvert.SerializeObject(response, jsonSettings));
         }
 
+        protected override Task OnClientDisconnectedAsync(IWebSocketContext context) {
+            authedClients.Remove(context.Id);
+            Logger.Info($"WebSocket client disconnected: {context.Id}");
+            return Task.CompletedTask;
+        }
 
     }
 

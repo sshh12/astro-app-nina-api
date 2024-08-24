@@ -35,7 +35,8 @@ namespace Plugin.NINA.AstroAppHTTPAPI.Web {
                 .WithModule(webSocketHandler)
                 .WithModule(new BasicAuthenticationModule("/").WithAccount("user", apiKey))
                 .WithWebApi("/api/v1/camera", m => m.WithController(() => new CameraRouteController(null, equipmentManager)))
-                .WithWebApi("/api/v1/dome", m => m.WithController(() => new DomeRouteController(null, equipmentManager)));
+                .WithWebApi("/api/v1/dome", m => m.WithController(() => new DomeRouteController(null, equipmentManager)))
+                .WithWebApi("/api/v1/telescope", m => m.WithController(() => new TelescopeRouteController(null, equipmentManager)));
         }
 
         public void Start() {

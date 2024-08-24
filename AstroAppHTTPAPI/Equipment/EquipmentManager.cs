@@ -1,6 +1,10 @@
-﻿using NINA.Equipment.Equipment.MyCamera;
+﻿using NINA.Core.Model;
+using NINA.Core.Utility;
+using NINA.Equipment.Equipment.MyCamera;
 using NINA.Equipment.Equipment.MyDome;
+using NINA.Equipment.Equipment.MyTelescope;
 using NINA.Equipment.Interfaces.Mediator;
+using NINA.WPF.Base.Interfaces.Mediator;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -43,15 +47,38 @@ namespace Plugin.NINA.AstroAppHTTPAPI.Equipment {
         }
     }
 
+    public enum TelescopeAction {
+        NONE = 0,
+        CONNECTED = 1,
+        DISCONNECTED = 2,
+        PARKED = 3,
+        HOMED = 4,
+        SLEWED = 5,
+        UNPARKED = 6,
+    }
+
+    public class TelescopeEventArgs : EventArgs {
+        public TelescopeAction Action { get; set; }
+
+        public TelescopeEventArgs(TelescopeAction action) {
+            Action = action;
+        }
+    }
+
     public class EquipmentManager {
         private ICameraMediator camera;
         private IDomeMediator dome;
+        private ITelescopeMediator telescope;
+        private IApplicationStatusMediator statusMediator;
         private static CancellationTokenSource domeTokenSource;
+        private static CancellationTokenSource telescopeTokenSource;
         public event EventHandler<CameraEventArgs> CameraUpdated;
         public event EventHandler<DomeEventArgs> DomeUpdated;
+        public event EventHandler<TelescopeEventArgs> TelescopeUpdated;
 
 
-        public EquipmentManager(ICameraMediator camera, IDomeMediator dome) {
+        public EquipmentManager(IApplicationStatusMediator statusMediator, ICameraMediator camera, IDomeMediator dome, ITelescopeMediator telescope) {
+            this.statusMediator = statusMediator;
             this.camera = camera;
             this.camera.Connected += (sender, e) => {
                 CameraUpdated?.Invoke(this, new CameraEventArgs(CameraAction.CONNECTED));
@@ -93,6 +120,31 @@ namespace Plugin.NINA.AstroAppHTTPAPI.Equipment {
                 DomeUpdated?.Invoke(this, new DomeEventArgs(DomeAction.HOMED));
                 return Task.CompletedTask;
             };
+            this.telescope = telescope;
+            this.telescope.Connected += (sender, e) => {
+                TelescopeUpdated?.Invoke(this, new TelescopeEventArgs(TelescopeAction.CONNECTED));
+                return Task.CompletedTask;
+            };
+            this.telescope.Disconnected += (sender, e) => {
+                TelescopeUpdated?.Invoke(this, new TelescopeEventArgs(TelescopeAction.DISCONNECTED));
+                return Task.CompletedTask;
+            };
+            this.telescope.Parked += (sender, e) => {
+                TelescopeUpdated?.Invoke(this, new TelescopeEventArgs(TelescopeAction.PARKED));
+                return Task.CompletedTask;
+            };
+            this.telescope.Homed += (sender, e) => {
+                TelescopeUpdated?.Invoke(this, new TelescopeEventArgs(TelescopeAction.HOMED));
+                return Task.CompletedTask;
+            };
+            this.telescope.Slewed += (sender, e) => {
+                TelescopeUpdated?.Invoke(this, new TelescopeEventArgs(TelescopeAction.SLEWED));
+                return Task.CompletedTask;
+            };
+            this.telescope.Unparked += (sender, e) => {
+                TelescopeUpdated?.Invoke(this, new TelescopeEventArgs(TelescopeAction.UNPARKED));
+                return Task.CompletedTask;
+            };
         }
 
         public async Task CameraConnect() {
@@ -109,6 +161,13 @@ namespace Plugin.NINA.AstroAppHTTPAPI.Equipment {
             }
         }
 
+        public async Task TelescopeConnect() {
+            if (!telescope.GetInfo().Connected) {
+                await telescope.Rescan();
+                await telescope.Connect();
+            }
+        }
+
         public async Task CameraDisconnect() {
             if (camera.GetInfo().Connected) {
                 await camera.Disconnect();
@@ -118,6 +177,12 @@ namespace Plugin.NINA.AstroAppHTTPAPI.Equipment {
         public async Task DomeDisconnect() {
             if (dome.GetInfo().Connected) {
                 await dome.Disconnect();
+            }
+        }
+
+        public async Task TelescopeDisconnect() {
+            if (telescope.GetInfo().Connected) {
+                await telescope.Disconnect();
             }
         }
 
@@ -133,6 +198,10 @@ namespace Plugin.NINA.AstroAppHTTPAPI.Equipment {
 
         public DomeInfo DomeInfo() {
             return dome.GetInfo();
+        }
+
+        public TelescopeInfo TelescopeInfo() {
+            return telescope.GetInfo();
         }
 
         public async Task DomeSetShutterOpen(bool open) {
@@ -156,10 +225,35 @@ namespace Plugin.NINA.AstroAppHTTPAPI.Equipment {
         }
 
         public async Task DomePark() {
-            if (dome.GetInfo().Connected) {
+            if (dome.GetInfo().Connected && !dome.GetInfo().AtPark) {
                 domeTokenSource?.Cancel();
                 domeTokenSource = new CancellationTokenSource();
                 await dome.Park(domeTokenSource.Token);
+            }
+        }
+
+        public async Task TelescopePark() {
+            var progress = new Progress<ApplicationStatus>(status => {
+                Logger.Info($"TelescopePark: {status.Progress}");
+            });
+            if (telescope.GetInfo().Connected && !telescope.GetInfo().AtPark) {
+                if (telescope.GetInfo().Slewing) {
+                    telescope.StopSlew();
+                }
+                telescopeTokenSource?.Cancel();
+                telescopeTokenSource = new CancellationTokenSource();
+                await telescope.ParkTelescope(progress, telescopeTokenSource.Token);
+            }
+        }
+
+        public async Task TelescopeUnpark() {
+            var progress = new Progress<ApplicationStatus>(status => {
+                Logger.Info($"TelescopeUnpark: {status.Progress}");
+            });
+            if (telescope.GetInfo().Connected && telescope.GetInfo().AtPark) {
+                telescopeTokenSource?.Cancel();
+                telescopeTokenSource = new CancellationTokenSource();
+                await telescope.UnparkTelescope(progress, telescopeTokenSource.Token);
             }
         }
 

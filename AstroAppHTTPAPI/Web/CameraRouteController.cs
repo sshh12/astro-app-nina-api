@@ -1,57 +1,43 @@
 ﻿using EmbedIO;
 using EmbedIO.Routing;
 using EmbedIO.WebApi;
-using Newtonsoft.Json;
 using Plugin.NINA.AstroAppHTTPAPI.Equipment;
 using System.Threading.Tasks;
 
 namespace Plugin.NINA.AstroAppHTTPAPI.Web {
-    public class CameraRouteController : WebApiController {
+    public class CameraRouteController : DeviceRouteController {
 
-        private EquipmentManager equipmentManager;
-        private JsonSerializerSettings jsonSettings;
-
-        public CameraRouteController(IHttpContext context, EquipmentManager equipmentManager) {
-            this.equipmentManager = equipmentManager;
-            jsonSettings = new JsonSerializerSettings {
-                NullValueHandling = NullValueHandling.Include
-            };
-        }
+        public CameraRouteController(IHttpContext context, EquipmentManager equipmentManager) : base(context, equipmentManager) { }
 
         [Route(HttpVerbs.Get, "/")]
-        public string CameraStatus() {
+        public async Task CameraStatus() {
             var info = equipmentManager.CameraInfo();
             var response = CameraStatusResponse.FromCameraInfo(info, CameraAction.NONE);
-            return JsonConvert.SerializeObject(response, jsonSettings);
+            RespondWithJSON(response);
         }
 
         [Route(HttpVerbs.Post, "/connect")]
-        public async Task<string> CameraConnect() {
+        public async Task CameraConnect() {
             await equipmentManager.CameraConnect();
             var info = equipmentManager.CameraInfo();
-            var response = new CameraConnectedResponse {
-                Name = info.Name,
-                DeviceId = info.DeviceId,
-                Success = true,
-            };
-            return JsonConvert.SerializeObject(response, jsonSettings);
+            var response = CameraStatusResponse.FromCameraInfo(info, CameraAction.CONNECTED);
+            RespondWithJSON(response);
         }
 
         [Route(HttpVerbs.Post, "/disconnect")]
-        public async Task<string> CameraDisconnect() {
+        public async Task CameraDisconnect() {
             await equipmentManager.CameraDisconnect();
-            var response = new CameraDisconnectedResponse {
-                Success = true,
-            };
-            return JsonConvert.SerializeObject(response, jsonSettings);
+            var info = equipmentManager.CameraInfo();
+            var response = CameraStatusResponse.FromCameraInfo(info, CameraAction.DISCONNECTED);
+            RespondWithJSON(response);
         }
 
         [Route(HttpVerbs.Patch, "/binning")]
-        public async Task<string> CameraSetBinning([JsonData] CameraBinningRequest request) {
+        public async Task CameraSetBinning([JsonData] CameraBinningRequest request) {
             await equipmentManager.CameraSetBinning(request.X, request.Y);
             var info = equipmentManager.CameraInfo();
             var response = CameraStatusResponse.FromCameraInfo(info, CameraAction.BINNING_UPDATED);
-            return JsonConvert.SerializeObject(response, jsonSettings);
+            RespondWithJSON(response);
         }
     }
 }

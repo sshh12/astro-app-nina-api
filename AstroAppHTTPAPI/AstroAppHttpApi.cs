@@ -5,6 +5,7 @@ using NINA.Plugin;
 using NINA.Plugin.Interfaces;
 using NINA.Profile;
 using NINA.Profile.Interfaces;
+using NINA.WPF.Base.Interfaces.Mediator;
 using NINA.WPF.Base.Interfaces.ViewModel;
 using Plugin.NINA.AstroAppHTTPAPI.Equipment;
 using Plugin.NINA.AstroAppHTTPAPI.Web;
@@ -28,7 +29,13 @@ namespace Plugin.NINA.AstroAppHTTPAPI {
 
 
         [ImportingConstructor]
-        public AstroAppHttpApi(IProfileService profileService, IOptionsVM options, ICameraMediator camera, IDomeMediator dome) {
+        public AstroAppHttpApi(
+                IProfileService profileService,
+                IOptionsVM options,
+                IApplicationStatusMediator statusMediator,
+                ICameraMediator camera,
+                IDomeMediator dome,
+                ITelescopeMediator telescope) {
             if (Settings.Default.UpdateSettings) {
                 Settings.Default.Upgrade();
                 Settings.Default.UpdateSettings = false;
@@ -41,7 +48,7 @@ namespace Plugin.NINA.AstroAppHTTPAPI {
                 ApiKey = GenerateRandomKey();
             }
 
-            equipmentManager = new EquipmentManager(camera, dome);
+            equipmentManager = new EquipmentManager(statusMediator, camera, dome, telescope);
             serverManager = new WebServerManager(Port, ApiKey, equipmentManager);
 
             if (WebServerEnabled) {
