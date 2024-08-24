@@ -1,5 +1,6 @@
 ﻿using EmbedIO;
 using EmbedIO.Authentication;
+using EmbedIO.Cors;
 using EmbedIO.WebApi;
 using NINA.Core.Utility.Notification;
 using Plugin.NINA.AstroAppHTTPAPI.Equipment;
@@ -29,6 +30,7 @@ namespace Plugin.NINA.AstroAppHTTPAPI.Web {
             server = new WebServer(o => o
                 .WithUrlPrefix($"http://*:{port}")
                 .WithMode(HttpListenerMode.EmbedIO))
+                .WithModule(new CorsModule("/", "*", "*", "*"))
                 .WithModule(webSocketHandler)
                 .WithModule(new BasicAuthenticationModule("/").WithAccount("user", apiKey))
                 .WithWebApi("/api/v1/camera", m => m.WithController(() => new CameraRouteController(null, equipmentManager)));

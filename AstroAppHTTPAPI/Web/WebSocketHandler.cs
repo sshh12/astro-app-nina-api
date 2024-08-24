@@ -17,7 +17,7 @@ namespace Plugin.NINA.AstroAppHTTPAPI.Web {
         public WebSocketHandler(string urlPath, EquipmentManager equipmentManager, string apiKey)
             : base(urlPath, true) {
             this.equipmentManager = equipmentManager;
-            this.equipmentManager.CameraUpdated += (object sender, CameraEventArgs e) => PostCameraStatus(e);
+            this.equipmentManager.CameraUpdated += async (object sender, CameraEventArgs e) => await PostCameraStatus(e);
             this.apiKey = apiKey;
             jsonSettings = new JsonSerializerSettings {
                 NullValueHandling = NullValueHandling.Include
@@ -25,14 +25,14 @@ namespace Plugin.NINA.AstroAppHTTPAPI.Web {
             authedClients = new HashSet<string>();
         }
 
-        private void PostCameraStatus(CameraEventArgs e) {
+        private async Task PostCameraStatus(CameraEventArgs e) {
             var info = equipmentManager.CameraInfo();
             var response = CameraStatusResponse.FromCameraInfo(info, e.Action);
-            BroadcastAuthedClientsAsync(JsonConvert.SerializeObject(response, jsonSettings));
+            await BroadcastAuthedClientsAsync(JsonConvert.SerializeObject(response, jsonSettings));
         }
 
-        public void BroadcastAuthedClientsAsync(string message) {
-            BroadcastAsync(message, (client) => authedClients.Contains(client.Id));
+        public async Task BroadcastAuthedClientsAsync(string message) {
+            await BroadcastAsync(message, (client) => authedClients.Contains(client.Id));
         }
 
         public void PostStatus() {
@@ -57,6 +57,7 @@ namespace Plugin.NINA.AstroAppHTTPAPI.Web {
             var socketResp = new WebSocketAuthenticatedResponse { Success = authSuccessful };
             if (authSuccessful) {
                 Logger.Info($"WebSocket client authenticated: {context.Id}");
+                authedClients.Add(context.Id);
                 await SendAsync(context, JsonConvert.SerializeObject(socketResp, jsonSettings));
             } else {
                 Logger.Info($"WebSocket client auth failed: {context.Id}");
