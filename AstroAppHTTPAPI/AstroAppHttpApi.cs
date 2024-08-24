@@ -44,7 +44,7 @@ namespace Plugin.NINA.AstroAppHTTPAPI {
             equipmentManager = new EquipmentManager {
                 Camera = camera
             };
-            serverManager = new WebServerManager(Port, equipmentManager);
+            serverManager = new WebServerManager(Port, ApiKey, equipmentManager);
 
             if (WebServerEnabled) {
                 serverManager.Start();
@@ -83,6 +83,10 @@ namespace Plugin.NINA.AstroAppHTTPAPI {
                 Settings.Default.ApiKey = value;
                 CoreUtil.SaveSettings(Settings.Default);
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ApiKey)));
+                serverManager.ApiKey = value;
+                if (WebServerEnabled) {
+                    serverManager.Restart();
+                }
             }
         }
 
@@ -93,6 +97,9 @@ namespace Plugin.NINA.AstroAppHTTPAPI {
                 CoreUtil.SaveSettings(Settings.Default);
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Port)));
                 serverManager.Port = value;
+                if (WebServerEnabled) {
+                    serverManager.Restart();
+                }
             }
         }
 

@@ -1,4 +1,5 @@
 ﻿using EmbedIO;
+using EmbedIO.Authentication;
 using EmbedIO.WebApi;
 using NINA.Core.Utility.Notification;
 using Plugin.NINA.AstroAppHTTPAPI.Equipment;
@@ -15,10 +16,12 @@ namespace Plugin.NINA.AstroAppHTTPAPI.Web {
         private int port;
         private EquipmentManager equipmentManager;
         private System.Timers.Timer statusTimer;
+        private string apiKey;
 
-        public WebServerManager(int port, EquipmentManager equipmentManager) {
+        public WebServerManager(int port, string apiKey, EquipmentManager equipmentManager) {
             this.port = port;
             this.equipmentManager = equipmentManager;
+            this.apiKey = apiKey;
         }
 
         private void CreateServer() {
@@ -26,6 +29,7 @@ namespace Plugin.NINA.AstroAppHTTPAPI.Web {
             server = new WebServer(o => o
                 .WithUrlPrefix($"http://*:{port}")
                 .WithMode(HttpListenerMode.EmbedIO))
+                .WithModule(new BasicAuthenticationModule("/").WithAccount("user", apiKey))
                 .WithWebApi("/api/v1", m => m.WithController(() => new RouteController(null, equipmentManager)))
                 .WithModule(webSocketHandler);
         }
@@ -84,12 +88,16 @@ namespace Plugin.NINA.AstroAppHTTPAPI.Web {
             get => port;
             set {
                 port = value;
-                if (server != null) {
-                    Restart();
-                }
             }
         }
+
+        public string ApiKey {
+            get => apiKey;
+            set {
+                apiKey = value;
+            }
+
+        }
+
     }
-
-
 }

@@ -50,6 +50,10 @@
                         <TextBox MinWidth="200" Text="{Binding AllowedIPRange}" />
                     </StackPanel>
                     <StackPanel Orientation="Horizontal" Margin="0,0,0,5">
+                        <TextBlock Text="Username" Width="150" />
+                        <TextBlock MinWidth="200" Text="user" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,5">
                         <TextBlock Text="API Key" Width="150" />
                         <TextBox MinWidth="200" Text="{Binding ApiKey}" />
                     </StackPanel>
