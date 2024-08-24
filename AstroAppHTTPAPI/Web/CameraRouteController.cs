@@ -18,10 +18,17 @@ namespace Plugin.NINA.AstroAppHTTPAPI.Web {
             };
         }
 
+        [Route(HttpVerbs.Get, "/")]
+        public string CameraStatus() {
+            var info = equipmentManager.CameraInfo();
+            var response = CameraStatusResponse.FromCameraInfo(info);
+            return JsonConvert.SerializeObject(response, jsonSettings);
+        }
+
         [Route(HttpVerbs.Post, "/connect")]
         public async Task<string> CameraConnect() {
             await equipmentManager.CameraConnect();
-            var info = equipmentManager.Camera.GetInfo();
+            var info = equipmentManager.CameraInfo();
             var response = new CameraConnectedResponse {
                 Name = info.Name,
                 DeviceId = info.DeviceId,
@@ -39,17 +46,10 @@ namespace Plugin.NINA.AstroAppHTTPAPI.Web {
             return JsonConvert.SerializeObject(response, jsonSettings);
         }
 
-        [Route(HttpVerbs.Get, "/")]
-        public string CameraStatus() {
-            var info = equipmentManager.Camera.GetInfo();
-            var response = CameraStatusResponse.FromCameraInfo(info);
-            return JsonConvert.SerializeObject(response, jsonSettings);
-        }
-
         [Route(HttpVerbs.Patch, "/binning")]
         public async Task<string> CameraSetBinning([JsonData] CameraBinningRequest request) {
             await equipmentManager.CameraSetBinning(request.x, request.y);
-            var info = equipmentManager.Camera.GetInfo();
+            var info = equipmentManager.CameraInfo();
             var response = CameraStatusResponse.FromCameraInfo(info);
             return JsonConvert.SerializeObject(response, jsonSettings);
         }

@@ -41,9 +41,7 @@ namespace Plugin.NINA.AstroAppHTTPAPI {
                 ApiKey = GenerateRandomKey();
             }
 
-            equipmentManager = new EquipmentManager {
-                Camera = camera
-            };
+            equipmentManager = new EquipmentManager(camera);
             serverManager = new WebServerManager(Port, ApiKey, equipmentManager);
 
             if (WebServerEnabled) {

@@ -19,7 +19,7 @@ namespace Plugin.NINA.AstroAppHTTPAPI.Web {
         }
 
         private void PostCameraStatus() {
-            var info = equipmentManager.Camera.GetInfo();
+            var info = equipmentManager.CameraInfo();
             var response = CameraStatusResponse.FromCameraInfo(info);
             BroadcastAsync(JsonConvert.SerializeObject(response, jsonSettings));
         }
