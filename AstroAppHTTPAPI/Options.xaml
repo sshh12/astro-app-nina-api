@@ -46,10 +46,6 @@
             <GroupBox Header="Security Settings" Margin="0,10,0,0">
                 <StackPanel Orientation="Vertical">
                     <StackPanel Orientation="Horizontal" Margin="0,0,0,5">
-                        <TextBlock Text="Allowed IP Range" Width="150" />
-                        <TextBox MinWidth="200" Text="{Binding AllowedIPRange}" />
-                    </StackPanel>
-                    <StackPanel Orientation="Horizontal" Margin="0,0,0,5">
                         <TextBlock Text="Username" Width="150" />
                         <TextBlock MinWidth="200" Text="user" />
                     </StackPanel>

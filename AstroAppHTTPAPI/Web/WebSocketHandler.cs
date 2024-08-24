@@ -18,6 +18,7 @@ namespace Plugin.NINA.AstroAppHTTPAPI.Web {
             : base(urlPath, true) {
             this.equipmentManager = equipmentManager;
             this.equipmentManager.CameraUpdated += async (object sender, CameraEventArgs e) => await PostCameraStatus(e);
+            this.equipmentManager.DomeUpdated += async (object sender, DomeEventArgs e) => await PostDomeStatus(e);
             this.apiKey = apiKey;
             jsonSettings = new JsonSerializerSettings {
                 NullValueHandling = NullValueHandling.Include
@@ -31,12 +32,18 @@ namespace Plugin.NINA.AstroAppHTTPAPI.Web {
             await BroadcastAuthedClientsAsync(JsonConvert.SerializeObject(response, jsonSettings));
         }
 
+        private async Task PostDomeStatus(DomeEventArgs e) {
+            var info = equipmentManager.DomeInfo();
+            var response = DomeStatusResponse.FromDomeInfo(info, e.Action);
+            await BroadcastAuthedClientsAsync(JsonConvert.SerializeObject(response, jsonSettings));
+        }
+
         public async Task BroadcastAuthedClientsAsync(string message) {
             await BroadcastAsync(message, (client) => authedClients.Contains(client.Id));
         }
 
         public void PostStatus() {
-            PostCameraStatus(new CameraEventArgs(CameraAction.NONE));
+            Task.WaitAll(PostCameraStatus(new CameraEventArgs(CameraAction.NONE)), PostDomeStatus(new DomeEventArgs(DomeAction.NONE)));
         }
 
         protected override async Task OnMessageReceivedAsync(

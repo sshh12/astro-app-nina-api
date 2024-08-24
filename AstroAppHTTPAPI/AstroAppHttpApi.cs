@@ -28,7 +28,7 @@ namespace Plugin.NINA.AstroAppHTTPAPI {
 
 
         [ImportingConstructor]
-        public AstroAppHttpApi(IProfileService profileService, IOptionsVM options, ICameraMediator camera) {
+        public AstroAppHttpApi(IProfileService profileService, IOptionsVM options, ICameraMediator camera, IDomeMediator dome) {
             if (Settings.Default.UpdateSettings) {
                 Settings.Default.Upgrade();
                 Settings.Default.UpdateSettings = false;
@@ -41,7 +41,7 @@ namespace Plugin.NINA.AstroAppHTTPAPI {
                 ApiKey = GenerateRandomKey();
             }
 
-            equipmentManager = new EquipmentManager(camera);
+            equipmentManager = new EquipmentManager(camera, dome);
             serverManager = new WebServerManager(Port, ApiKey, equipmentManager);
 
             if (WebServerEnabled) {

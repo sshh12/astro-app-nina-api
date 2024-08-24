@@ -5,6 +5,7 @@ using EmbedIO.WebApi;
 using NINA.Core.Utility.Notification;
 using Plugin.NINA.AstroAppHTTPAPI.Equipment;
 using System;
+using System.Linq;
 using System.Threading;
 using System.Timers;
 
@@ -33,7 +34,8 @@ namespace Plugin.NINA.AstroAppHTTPAPI.Web {
                 .WithModule(new CorsModule("/", "*", "*", "*"))
                 .WithModule(webSocketHandler)
                 .WithModule(new BasicAuthenticationModule("/").WithAccount("user", apiKey))
-                .WithWebApi("/api/v1/camera", m => m.WithController(() => new CameraRouteController(null, equipmentManager)));
+                .WithWebApi("/api/v1/camera", m => m.WithController(() => new CameraRouteController(null, equipmentManager)))
+                .WithWebApi("/api/v1/dome", m => m.WithController(() => new DomeRouteController(null, equipmentManager)));
         }
 
         public void Start() {
@@ -75,7 +77,8 @@ namespace Plugin.NINA.AstroAppHTTPAPI.Web {
         [STAThread]
         private void RunServerTask(WebServer server) {
             try {
-                Notification.ShowSuccess($"Web server started, listening at //:{Port}");
+                var localAddress = server.Listener.Prefixes.FirstOrDefault();
+                Notification.ShowSuccess($"Web server started, listening at {localAddress}");
                 server.RunAsync().Wait();
             } catch (Exception ex) {
                 Notification.ShowError($"Failed to start web server {ex}");
