@@ -19,7 +19,7 @@ namespace Plugin.NINA.AstroAppHTTPAPI.Web {
             this.equipmentManager = equipmentManager;
             this.equipmentManager.CameraUpdated += async (object sender, CameraEventArgs e) => await PostCameraStatus(e);
             this.equipmentManager.DomeUpdated += async (object sender, DomeEventArgs e) => await PostDomeStatus(e);
-            this.equipmentManager.TelescopeUpdated += async (object sender, TelescopeEventArgs e) => await PostTelescopeStatus(e);
+            this.equipmentManager.MountUpdated += async (object sender, MountEventArgs e) => await PostMountStatus(e);
             this.apiKey = apiKey;
             jsonSettings = new JsonSerializerSettings {
                 NullValueHandling = NullValueHandling.Include
@@ -39,9 +39,9 @@ namespace Plugin.NINA.AstroAppHTTPAPI.Web {
             await BroadcastAuthedClientsAsync(JsonConvert.SerializeObject(response, jsonSettings));
         }
 
-        private async Task PostTelescopeStatus(TelescopeEventArgs e) {
-            var info = equipmentManager.TelescopeInfo();
-            var response = TelescopeStatusResponse.FromTelescopeInfo(info, e.Action);
+        private async Task PostMountStatus(MountEventArgs e) {
+            var info = equipmentManager.MountInfo();
+            var response = MountStatusResponse.FromMountInfo(info, e.Action);
             await BroadcastAuthedClientsAsync(JsonConvert.SerializeObject(response, jsonSettings));
         }
 
@@ -53,7 +53,7 @@ namespace Plugin.NINA.AstroAppHTTPAPI.Web {
             Task.WaitAll(
                 PostCameraStatus(new CameraEventArgs(CameraAction.NONE)),
                 PostDomeStatus(new DomeEventArgs(DomeAction.NONE)),
-                PostTelescopeStatus(new TelescopeEventArgs(TelescopeAction.NONE))
+                PostMountStatus(new MountEventArgs(MountAction.NONE))
             );
         }
 
@@ -77,6 +77,7 @@ namespace Plugin.NINA.AstroAppHTTPAPI.Web {
                 Logger.Info($"WebSocket client authenticated: {context.Id}");
                 authedClients.Add(context.Id);
                 await SendAsync(context, JsonConvert.SerializeObject(socketResp, jsonSettings));
+                PostStatus();
             } else {
                 Logger.Info($"WebSocket client auth failed: {context.Id}");
                 await SendAsync(context, JsonConvert.SerializeObject(socketResp, jsonSettings));

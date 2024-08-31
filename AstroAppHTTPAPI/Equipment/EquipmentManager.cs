@@ -47,7 +47,7 @@ namespace Plugin.NINA.AstroAppHTTPAPI.Equipment {
         }
     }
 
-    public enum TelescopeAction {
+    public enum MountAction {
         NONE = 0,
         CONNECTED = 1,
         DISCONNECTED = 2,
@@ -57,10 +57,10 @@ namespace Plugin.NINA.AstroAppHTTPAPI.Equipment {
         UNPARKED = 6,
     }
 
-    public class TelescopeEventArgs : EventArgs {
-        public TelescopeAction Action { get; set; }
+    public class MountEventArgs : EventArgs {
+        public MountAction Action { get; set; }
 
-        public TelescopeEventArgs(TelescopeAction action) {
+        public MountEventArgs(MountAction action) {
             Action = action;
         }
     }
@@ -68,13 +68,13 @@ namespace Plugin.NINA.AstroAppHTTPAPI.Equipment {
     public class EquipmentManager {
         private ICameraMediator camera;
         private IDomeMediator dome;
-        private ITelescopeMediator telescope;
+        private ITelescopeMediator mount;
         private IApplicationStatusMediator statusMediator;
         private static CancellationTokenSource domeTokenSource;
         private static CancellationTokenSource telescopeTokenSource;
         public event EventHandler<CameraEventArgs> CameraUpdated;
         public event EventHandler<DomeEventArgs> DomeUpdated;
-        public event EventHandler<TelescopeEventArgs> TelescopeUpdated;
+        public event EventHandler<MountEventArgs> MountUpdated;
 
 
         public EquipmentManager(IApplicationStatusMediator statusMediator, ICameraMediator camera, IDomeMediator dome, ITelescopeMediator telescope) {
@@ -120,29 +120,29 @@ namespace Plugin.NINA.AstroAppHTTPAPI.Equipment {
                 DomeUpdated?.Invoke(this, new DomeEventArgs(DomeAction.HOMED));
                 return Task.CompletedTask;
             };
-            this.telescope = telescope;
-            this.telescope.Connected += (sender, e) => {
-                TelescopeUpdated?.Invoke(this, new TelescopeEventArgs(TelescopeAction.CONNECTED));
+            this.mount = telescope;
+            this.mount.Connected += (sender, e) => {
+                MountUpdated?.Invoke(this, new MountEventArgs(MountAction.CONNECTED));
                 return Task.CompletedTask;
             };
-            this.telescope.Disconnected += (sender, e) => {
-                TelescopeUpdated?.Invoke(this, new TelescopeEventArgs(TelescopeAction.DISCONNECTED));
+            this.mount.Disconnected += (sender, e) => {
+                MountUpdated?.Invoke(this, new MountEventArgs(MountAction.DISCONNECTED));
                 return Task.CompletedTask;
             };
-            this.telescope.Parked += (sender, e) => {
-                TelescopeUpdated?.Invoke(this, new TelescopeEventArgs(TelescopeAction.PARKED));
+            this.mount.Parked += (sender, e) => {
+                MountUpdated?.Invoke(this, new MountEventArgs(MountAction.PARKED));
                 return Task.CompletedTask;
             };
-            this.telescope.Homed += (sender, e) => {
-                TelescopeUpdated?.Invoke(this, new TelescopeEventArgs(TelescopeAction.HOMED));
+            this.mount.Homed += (sender, e) => {
+                MountUpdated?.Invoke(this, new MountEventArgs(MountAction.HOMED));
                 return Task.CompletedTask;
             };
-            this.telescope.Slewed += (sender, e) => {
-                TelescopeUpdated?.Invoke(this, new TelescopeEventArgs(TelescopeAction.SLEWED));
+            this.mount.Slewed += (sender, e) => {
+                MountUpdated?.Invoke(this, new MountEventArgs(MountAction.SLEWED));
                 return Task.CompletedTask;
             };
-            this.telescope.Unparked += (sender, e) => {
-                TelescopeUpdated?.Invoke(this, new TelescopeEventArgs(TelescopeAction.UNPARKED));
+            this.mount.Unparked += (sender, e) => {
+                MountUpdated?.Invoke(this, new MountEventArgs(MountAction.UNPARKED));
                 return Task.CompletedTask;
             };
         }
@@ -161,10 +161,10 @@ namespace Plugin.NINA.AstroAppHTTPAPI.Equipment {
             }
         }
 
-        public async Task TelescopeConnect() {
-            if (!telescope.GetInfo().Connected) {
-                await telescope.Rescan();
-                await telescope.Connect();
+        public async Task MountConnect() {
+            if (!mount.GetInfo().Connected) {
+                await mount.Rescan();
+                await mount.Connect();
             }
         }
 
@@ -180,9 +180,9 @@ namespace Plugin.NINA.AstroAppHTTPAPI.Equipment {
             }
         }
 
-        public async Task TelescopeDisconnect() {
-            if (telescope.GetInfo().Connected) {
-                await telescope.Disconnect();
+        public async Task MountDisconnect() {
+            if (mount.GetInfo().Connected) {
+                await mount.Disconnect();
             }
         }
 
@@ -200,8 +200,8 @@ namespace Plugin.NINA.AstroAppHTTPAPI.Equipment {
             return dome.GetInfo();
         }
 
-        public TelescopeInfo TelescopeInfo() {
-            return telescope.GetInfo();
+        public TelescopeInfo MountInfo() {
+            return mount.GetInfo();
         }
 
         public async Task DomeSetShutterOpen(bool open) {
@@ -232,28 +232,28 @@ namespace Plugin.NINA.AstroAppHTTPAPI.Equipment {
             }
         }
 
-        public async Task TelescopePark() {
+        public async Task MountPark() {
             var progress = new Progress<ApplicationStatus>(status => {
                 Logger.Info($"TelescopePark: {status.Progress}");
             });
-            if (telescope.GetInfo().Connected && !telescope.GetInfo().AtPark) {
-                if (telescope.GetInfo().Slewing) {
-                    telescope.StopSlew();
+            if (mount.GetInfo().Connected && !mount.GetInfo().AtPark) {
+                if (mount.GetInfo().Slewing) {
+                    mount.StopSlew();
                 }
                 telescopeTokenSource?.Cancel();
                 telescopeTokenSource = new CancellationTokenSource();
-                await telescope.ParkTelescope(progress, telescopeTokenSource.Token);
+                await mount.ParkTelescope(progress, telescopeTokenSource.Token);
             }
         }
 
-        public async Task TelescopeUnpark() {
+        public async Task MountUnpark() {
             var progress = new Progress<ApplicationStatus>(status => {
                 Logger.Info($"TelescopeUnpark: {status.Progress}");
             });
-            if (telescope.GetInfo().Connected && telescope.GetInfo().AtPark) {
+            if (mount.GetInfo().Connected && mount.GetInfo().AtPark) {
                 telescopeTokenSource?.Cancel();
                 telescopeTokenSource = new CancellationTokenSource();
-                await telescope.UnparkTelescope(progress, telescopeTokenSource.Token);
+                await mount.UnparkTelescope(progress, telescopeTokenSource.Token);
             }
         }
 

@@ -80,8 +80,8 @@ namespace Plugin.NINA.AstroAppHTTPAPI.Web {
         }
     }
 
-    public class TelescopeStatusResponse {
-        public string Type = "TelescopeStatus";
+    public class MountStatusResponse {
+        public string Type = "MountStatus";
         public string Name { get; set; }
         public string UTCDate { get; set; }
         public string Description { get; set; }
@@ -101,8 +101,8 @@ namespace Plugin.NINA.AstroAppHTTPAPI.Web {
         public double SiteLongitude { get; set; }
         public string Action { get; set; }
 
-        public static TelescopeStatusResponse FromTelescopeInfo(TelescopeInfo info, TelescopeAction action) {
-            return new TelescopeStatusResponse {
+        public static MountStatusResponse FromMountInfo(TelescopeInfo info, MountAction action) {
+            return new MountStatusResponse {
                 Name = info.Name,
                 UTCDate = info.UTCDate.ToString(),
                 Description = info.Description,
