@@ -38,6 +38,7 @@ namespace Plugin.NINA.AstroAppHTTPAPI.Web {
                 .WithWebApi("/api/v1/dome", m => m.WithController(() => new DomeRouteController(null, equipmentManager)))
                 .WithWebApi("/api/v1/mount", m => m.WithController(() => new MountRouteController(null, equipmentManager)))
                 .WithWebApi("/api/v1/rotator", m => m.WithController(() => new RotatorRouteController(null, equipmentManager)))
+                .WithWebApi("/api/v1/switch", m => m.WithController(() => new SwitchRouteController(null, equipmentManager)))
                 .WithWebApi("/api/v1/focuser", m => m.WithController(() => new FocuserRouteController(null, equipmentManager)))
                 .WithWebApi("/api/v1/filterwheel", m => m.WithController(() => new FilterWheelRouteController(null, equipmentManager)))
                 .WithWebApi("/api/v1/flatdevice", m => m.WithController(() => new FlatDeviceRouteController(null, equipmentManager)))

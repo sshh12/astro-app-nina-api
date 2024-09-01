@@ -22,6 +22,7 @@ namespace Plugin.NINA.AstroAppHTTPAPI.Web {
             this.equipmentManager.MountUpdated += async (object sender, MountEventArgs e) => await PostMountStatus(e);
             this.equipmentManager.FilterWheelUpdated += async (object sender, FilterWheelEventArgs e) => await PostFilterWheelStatus(e);
             this.equipmentManager.FocuserUpdated += async (object sender, FocuserEventArgs e) => await PostFocuserStatus(e);
+            this.equipmentManager.SwitchUpdated += async (object sender, SwitchEventArgs e) => await PostSwitchStatus(e);
             this.equipmentManager.GuiderUpdated += async (object sender, GuiderEventArgs e) => await PostGuiderStatus(e);
             this.equipmentManager.RotatorUpdated += async (object sender, RotatorEventArgs e) => await PostRotatorStatus(e);
             this.equipmentManager.FlatDeviceUpdated += async (object sender, FlatDeviceEventArgs e) => await PostFlatDeviceStatus(e);
@@ -75,6 +76,12 @@ namespace Plugin.NINA.AstroAppHTTPAPI.Web {
             await BroadcastAuthedClientsAsync(JsonConvert.SerializeObject(response, jsonSettings));
         }
 
+        private async Task PostSwitchStatus(SwitchEventArgs e) {
+            var info = equipmentManager.SwitchInfo();
+            var response = SwitchStatusResponse.FromSwitchInfo(info, e.Action);
+            await BroadcastAuthedClientsAsync(JsonConvert.SerializeObject(response, jsonSettings));
+        }
+
         private async Task PostFlatDeviceStatus(FlatDeviceEventArgs e) {
             var info = equipmentManager.FlatDeviceInfo();
             var response = FlatDeviceStatusResponse.FromFlatDeviceInfo(info, e.Action);
@@ -108,7 +115,8 @@ namespace Plugin.NINA.AstroAppHTTPAPI.Web {
                 PostRotatorStatus(new RotatorEventArgs(RotatorAction.NONE)),
                 PostFlatDeviceStatus(new FlatDeviceEventArgs(FlatDeviceAction.NONE)),
                 PostWeatherStatus(new WeatherEventArgs(WeatherAction.NONE)),
-                PostSafetyMonitorStatus(new SafetyMonitorEventArgs(SafetyMonitorAction.NONE))
+                PostSafetyMonitorStatus(new SafetyMonitorEventArgs(SafetyMonitorAction.NONE)),
+                PostSwitchStatus(new SwitchEventArgs(SwitchAction.NONE))
             );
         }
 

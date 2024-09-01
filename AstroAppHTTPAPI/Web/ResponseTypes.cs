@@ -161,7 +161,7 @@ namespace Plugin.NINA.AstroAppHTTPAPI.Web {
         public bool Connected { get; set; }
         public int Position { get; set; }
         public bool TempComp { get; set; }
-        public double Temperature { get; set; }
+        public double? Temperature { get; set; }
         public string Action { get; set; }
 
         public static FocuserStatusResponse FromFocuserInfo(FocuserInfo info, FocuserAction action) {
@@ -172,7 +172,7 @@ namespace Plugin.NINA.AstroAppHTTPAPI.Web {
                 Connected = info.Connected,
                 Position = info.Position,
                 TempComp = info.TempComp,
-                Temperature = info.Temperature,
+                Temperature = Double.IsNaN(info.Temperature) ? null : info.Temperature,
                 Action = action.ToString(),
             };
         }
@@ -266,15 +266,15 @@ namespace Plugin.NINA.AstroAppHTTPAPI.Web {
         public string Description { get; set; }
         public string DeviceId { get; set; }
         public bool Connected { get; set; }
-        public double Temperature { get; set; }
-        public double Humidity { get; set; }
-        public double DewPoint { get; set; }
-        public double WindSpeed { get; set; }
-        public double WindDirection { get; set; }
-        public double Pressure { get; set; }
-        public double SkyBrightness { get; set; }
-        public double RainRate { get; set; }
-        public double CloudCover { get; set; }
+        public double? Temperature { get; set; }
+        public double? Humidity { get; set; }
+        public double? DewPoint { get; set; }
+        public double? WindSpeed { get; set; }
+        public double? WindDirection { get; set; }
+        public double? Pressure { get; set; }
+        public double? SkyBrightness { get; set; }
+        public double? RainRate { get; set; }
+        public double? CloudCover { get; set; }
         public string Action { get; set; }
 
         public static WeatherStatusResponse FromWeatherInfo(WeatherDataInfo info, WeatherAction action) {
@@ -283,15 +283,15 @@ namespace Plugin.NINA.AstroAppHTTPAPI.Web {
                 Description = info.Description,
                 DeviceId = info.DeviceId,
                 Connected = info.Connected,
-                Temperature = info.Temperature,
-                Humidity = info.Humidity,
-                DewPoint = info.DewPoint,
-                WindSpeed = info.WindSpeed,
-                WindDirection = info.WindDirection,
-                Pressure = info.Pressure,
-                SkyBrightness = info.SkyBrightness,
-                RainRate = info.RainRate,
-                CloudCover = info.CloudCover,
+                Temperature = Double.IsNaN(info.Temperature) ? null : info.Temperature,
+                Humidity = Double.IsNaN(info.Humidity) ? null : info.Humidity,
+                DewPoint = Double.IsNaN(info.DewPoint) ? null : info.DewPoint,
+                WindSpeed = Double.IsNaN(info.WindSpeed) ? null : info.WindSpeed,
+                WindDirection = Double.IsNaN(info.WindDirection) ? null : info.WindDirection,
+                Pressure = Double.IsNaN(info.Pressure) ? null : info.Pressure,
+                SkyBrightness = Double.IsNaN(info.SkyBrightness) ? null : info.SkyBrightness,
+                RainRate = Double.IsNaN(info.RainRate) ? null : info.RainRate,
+                CloudCover = Double.IsNaN(info.CloudCover) ? null : info.CloudCover,
                 Action = action.ToString(),
             };
         }
