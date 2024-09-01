@@ -2,7 +2,15 @@
 using NINA.Core.Utility;
 using NINA.Equipment.Equipment.MyCamera;
 using NINA.Equipment.Equipment.MyDome;
+using NINA.Equipment.Equipment.MyFilterWheel;
 using NINA.Equipment.Equipment.MyTelescope;
+using NINA.Equipment.Equipment.MyFocuser;
+using NINA.Equipment.Equipment.MyGuider;
+using NINA.Equipment.Equipment.MySwitch;
+using NINA.Equipment.Equipment.MyRotator;
+using NINA.Equipment.Equipment.MyFlatDevice;
+using NINA.Equipment.Equipment.MyWeatherData;
+using NINA.Equipment.Equipment.MySafetyMonitor;
 using NINA.Equipment.Interfaces.Mediator;
 using NINA.WPF.Base.Interfaces.Mediator;
 using System;
@@ -65,19 +73,159 @@ namespace Plugin.NINA.AstroAppHTTPAPI.Equipment {
         }
     }
 
+    public enum FilterWheelAction {
+        NONE = 0,
+        CONNECTED = 1,
+        DISCONNECTED = 2
+    }
+
+    public class FilterWheelEventArgs : EventArgs {
+        public FilterWheelAction Action { get; set; }
+
+        public FilterWheelEventArgs(FilterWheelAction action) {
+            Action = action;
+        }
+    }
+
+    public enum FocuserAction {
+        NONE = 0,
+        CONNECTED = 1,
+        DISCONNECTED = 2
+    }
+
+    public class FocuserEventArgs : EventArgs {
+        public FocuserAction Action { get; set; }
+
+        public FocuserEventArgs(FocuserAction action) {
+            Action = action;
+        }
+    }
+
+    public enum GuiderAction {
+        NONE = 0,
+        CONNECTED = 1,
+        DISCONNECTED = 2
+    }
+
+    public class GuiderEventArgs : EventArgs {
+        public GuiderAction Action { get; set; }
+
+        public GuiderEventArgs(GuiderAction action) {
+            Action = action;
+        }
+    }
+
+    public enum SwitchAction {
+        NONE = 0,
+        CONNECTED = 1,
+        DISCONNECTED = 2
+    }
+
+    public class SwitchEventArgs : EventArgs {
+        public SwitchAction Action { get; set; }
+
+        public SwitchEventArgs(SwitchAction action) {
+            Action = action;
+        }
+    }
+
+    public enum RotatorAction {
+        NONE = 0,
+        CONNECTED = 1,
+        DISCONNECTED = 2
+    }
+
+    public class RotatorEventArgs : EventArgs {
+        public RotatorAction Action { get; set; }
+
+        public RotatorEventArgs(RotatorAction action) {
+            Action = action;
+        }
+    }
+
+    public enum FlatDeviceAction {
+        NONE = 0,
+        CONNECTED = 1,
+        DISCONNECTED = 2
+    }
+
+    public class FlatDeviceEventArgs : EventArgs {
+        public FlatDeviceAction Action { get; set; }
+
+        public FlatDeviceEventArgs(FlatDeviceAction action) {
+            Action = action;
+        }
+    }
+
+    public enum WeatherAction {
+        NONE = 0,
+        CONNECTED = 1,
+        DISCONNECTED = 2
+    }
+
+    public class WeatherEventArgs : EventArgs {
+        public WeatherAction Action { get; set; }
+
+        public WeatherEventArgs(WeatherAction action) {
+            Action = action;
+        }
+    }
+
+    public enum SafetyMonitorAction {
+        NONE = 0,
+        CONNECTED = 1,
+        DISCONNECTED = 2
+    }
+
+    public class SafetyMonitorEventArgs : EventArgs {
+        public SafetyMonitorAction Action { get; set; }
+
+        public SafetyMonitorEventArgs(SafetyMonitorAction action) {
+            Action = action;
+        }
+    }
+
     public class EquipmentManager {
+        private IApplicationStatusMediator statusMediator;
         private ICameraMediator camera;
         private IDomeMediator dome;
+        private IFilterWheelMediator filterWheel;
+        private IFocuserMediator focuser;
+        private IGuiderMediator guider;
+        private ISwitchMediator switches;
+        private IRotatorMediator rotator;
+        private IFlatDeviceMediator flatDevice;
+        private IWeatherDataMediator weather;
+        private ISafetyMonitorMediator safetyMonitor;
         private ITelescopeMediator mount;
-        private IApplicationStatusMediator statusMediator;
         private static CancellationTokenSource domeTokenSource;
-        private static CancellationTokenSource telescopeTokenSource;
+        private static CancellationTokenSource mountTokenSource;
         public event EventHandler<CameraEventArgs> CameraUpdated;
         public event EventHandler<DomeEventArgs> DomeUpdated;
         public event EventHandler<MountEventArgs> MountUpdated;
+        public event EventHandler<FilterWheelEventArgs> FilterWheelUpdated;
+        public event EventHandler<FocuserEventArgs> FocuserUpdated;
+        public event EventHandler<GuiderEventArgs> GuiderUpdated;
+        public event EventHandler<SwitchEventArgs> SwitchUpdated;
+        public event EventHandler<RotatorEventArgs> RotatorUpdated;
+        public event EventHandler<FlatDeviceEventArgs> FlatDeviceUpdated;
+        public event EventHandler<WeatherEventArgs> WeatherUpdated;
+        public event EventHandler<SafetyMonitorEventArgs> SafetyMonitorUpdated;
 
-
-        public EquipmentManager(IApplicationStatusMediator statusMediator, ICameraMediator camera, IDomeMediator dome, ITelescopeMediator telescope) {
+        public EquipmentManager(
+                IApplicationStatusMediator statusMediator,
+                ICameraMediator camera,
+                IDomeMediator dome,
+                IFilterWheelMediator filterWheel,
+                IFocuserMediator focuser,
+                IGuiderMediator guider,
+                ISwitchMediator switches,
+                IRotatorMediator rotator,
+                IFlatDeviceMediator flatDevice,
+                IWeatherDataMediator weather,
+                ISafetyMonitorMediator safetyMonitor,
+                ITelescopeMediator mount
+        ) {
             this.statusMediator = statusMediator;
             this.camera = camera;
             this.camera.Connected += (sender, e) => {
@@ -120,7 +268,7 @@ namespace Plugin.NINA.AstroAppHTTPAPI.Equipment {
                 DomeUpdated?.Invoke(this, new DomeEventArgs(DomeAction.HOMED));
                 return Task.CompletedTask;
             };
-            this.mount = telescope;
+            this.mount = mount;
             this.mount.Connected += (sender, e) => {
                 MountUpdated?.Invoke(this, new MountEventArgs(MountAction.CONNECTED));
                 return Task.CompletedTask;
@@ -143,6 +291,78 @@ namespace Plugin.NINA.AstroAppHTTPAPI.Equipment {
             };
             this.mount.Unparked += (sender, e) => {
                 MountUpdated?.Invoke(this, new MountEventArgs(MountAction.UNPARKED));
+                return Task.CompletedTask;
+            };
+            this.filterWheel = filterWheel;
+            this.filterWheel.Connected += (sender, e) => {
+                FilterWheelUpdated?.Invoke(this, new FilterWheelEventArgs(FilterWheelAction.CONNECTED));
+                return Task.CompletedTask;
+            };
+            this.filterWheel.Disconnected += (sender, e) => {
+                FilterWheelUpdated?.Invoke(this, new FilterWheelEventArgs(FilterWheelAction.DISCONNECTED));
+                return Task.CompletedTask;
+            };
+            this.focuser = focuser;
+            this.focuser.Connected += (sender, e) => {
+                FocuserUpdated?.Invoke(this, new FocuserEventArgs(FocuserAction.CONNECTED));
+                return Task.CompletedTask;
+            };
+            this.focuser.Disconnected += (sender, e) => {
+                FocuserUpdated?.Invoke(this, new FocuserEventArgs(FocuserAction.DISCONNECTED));
+                return Task.CompletedTask;
+            };
+            this.guider = guider;
+            this.guider.Connected += (sender, e) => {
+                GuiderUpdated?.Invoke(this, new GuiderEventArgs(GuiderAction.CONNECTED));
+                return Task.CompletedTask;
+            };
+            this.guider.Disconnected += (sender, e) => {
+                GuiderUpdated?.Invoke(this, new GuiderEventArgs(GuiderAction.DISCONNECTED));
+                return Task.CompletedTask;
+            };
+            this.switches = switches;
+            this.switches.Connected += (sender, e) => {
+                SwitchUpdated?.Invoke(this, new SwitchEventArgs(SwitchAction.CONNECTED));
+                return Task.CompletedTask;
+            };
+            this.switches.Disconnected += (sender, e) => {
+                SwitchUpdated?.Invoke(this, new SwitchEventArgs(SwitchAction.DISCONNECTED));
+                return Task.CompletedTask;
+            };
+            this.rotator = rotator;
+            this.rotator.Connected += (sender, e) => {
+                RotatorUpdated?.Invoke(this, new RotatorEventArgs(RotatorAction.CONNECTED));
+                return Task.CompletedTask;
+            };
+            this.rotator.Disconnected += (sender, e) => {
+                RotatorUpdated?.Invoke(this, new RotatorEventArgs(RotatorAction.DISCONNECTED));
+                return Task.CompletedTask;
+            };
+            this.flatDevice = flatDevice;
+            this.flatDevice.Connected += (sender, e) => {
+                FlatDeviceUpdated?.Invoke(this, new FlatDeviceEventArgs(FlatDeviceAction.CONNECTED));
+                return Task.CompletedTask;
+            };
+            this.flatDevice.Disconnected += (sender, e) => {
+                FlatDeviceUpdated?.Invoke(this, new FlatDeviceEventArgs(FlatDeviceAction.DISCONNECTED));
+                return Task.CompletedTask;
+            };
+            this.weather = weather;
+            this.weather.Connected += (sender, e) => {
+                WeatherUpdated?.Invoke(this, new WeatherEventArgs(WeatherAction.CONNECTED));
+                return Task.CompletedTask;
+            };
+            this.weather.Disconnected += (sender, e) => {
+                WeatherUpdated?.Invoke(this, new WeatherEventArgs(WeatherAction.DISCONNECTED));
+                return Task.CompletedTask;
+            };
+            this.safetyMonitor = safetyMonitor;
+            this.safetyMonitor.Connected += (sender, e) => {
+                SafetyMonitorUpdated?.Invoke(this, new SafetyMonitorEventArgs(SafetyMonitorAction.CONNECTED));
+                return Task.CompletedTask;
+            };
+            this.safetyMonitor.Disconnected += (sender, e) => {
+                SafetyMonitorUpdated?.Invoke(this, new SafetyMonitorEventArgs(SafetyMonitorAction.DISCONNECTED));
                 return Task.CompletedTask;
             };
         }
@@ -168,6 +388,62 @@ namespace Plugin.NINA.AstroAppHTTPAPI.Equipment {
             }
         }
 
+        public async Task FilterWheelConnect() {
+            if (!filterWheel.GetInfo().Connected) {
+                await filterWheel.Rescan();
+                await filterWheel.Connect();
+            }
+        }
+
+        public async Task FocuserConnect() {
+            if (!focuser.GetInfo().Connected) {
+                await focuser.Rescan();
+                await focuser.Connect();
+            }
+        }
+
+        public async Task GuiderConnect() {
+            if (!guider.GetInfo().Connected) {
+                await guider.Rescan();
+                await guider.Connect();
+            }
+        }
+
+        public async Task SwitchConnect() {
+            if (!switches.GetInfo().Connected) {
+                await switches.Rescan();
+                await switches.Connect();
+            }
+        }
+
+        public async Task RotatorConnect() {
+            if (!rotator.GetInfo().Connected) {
+                await rotator.Rescan();
+                await rotator.Connect();
+            }
+        }
+
+        public async Task FlatDeviceConnect() {
+            if (!flatDevice.GetInfo().Connected) {
+                await flatDevice.Rescan();
+                await flatDevice.Connect();
+            }
+        }
+
+        public async Task WeatherConnect() {
+            if (!weather.GetInfo().Connected) {
+                await weather.Rescan();
+                await weather.Connect();
+            }
+        }
+
+        public async Task SafetyMonitorConnect() {
+            if (!safetyMonitor.GetInfo().Connected) {
+                await safetyMonitor.Rescan();
+                await safetyMonitor.Connect();
+            }
+        }
+
         public async Task CameraDisconnect() {
             if (camera.GetInfo().Connected) {
                 await camera.Disconnect();
@@ -183,6 +459,54 @@ namespace Plugin.NINA.AstroAppHTTPAPI.Equipment {
         public async Task MountDisconnect() {
             if (mount.GetInfo().Connected) {
                 await mount.Disconnect();
+            }
+        }
+
+        public async Task FilterWheelDisconnect() {
+            if (filterWheel.GetInfo().Connected) {
+                await filterWheel.Disconnect();
+            }
+        }
+
+        public async Task FocuserDisconnect() {
+            if (focuser.GetInfo().Connected) {
+                await focuser.Disconnect();
+            }
+        }
+
+        public async Task GuiderDisconnect() {
+            if (guider.GetInfo().Connected) {
+                await guider.Disconnect();
+            }
+        }
+
+        public async Task SwitchDisconnect() {
+            if (switches.GetInfo().Connected) {
+                await switches.Disconnect();
+            }
+        }
+
+        public async Task RotatorDisconnect() {
+            if (rotator.GetInfo().Connected) {
+                await rotator.Disconnect();
+            }
+        }
+
+        public async Task FlatDeviceDisconnect() {
+            if (flatDevice.GetInfo().Connected) {
+                await flatDevice.Disconnect();
+            }
+        }
+
+        public async Task WeatherDisconnect() {
+            if (weather.GetInfo().Connected) {
+                await weather.Disconnect();
+            }
+        }
+
+        public async Task SafetyMonitorDisconnect() {
+            if (safetyMonitor.GetInfo().Connected) {
+                await safetyMonitor.Disconnect();
             }
         }
 
@@ -202,6 +526,38 @@ namespace Plugin.NINA.AstroAppHTTPAPI.Equipment {
 
         public TelescopeInfo MountInfo() {
             return mount.GetInfo();
+        }
+
+        public FilterWheelInfo FilterWheelInfo() {
+            return filterWheel.GetInfo();
+        }
+
+        public FocuserInfo FocuserInfo() {
+            return focuser.GetInfo();
+        }
+
+        public GuiderInfo GuiderInfo() {
+            return guider.GetInfo();
+        }
+
+        public SwitchInfo SwitchInfo() {
+            return switches.GetInfo();
+        }
+
+        public RotatorInfo RotatorInfo() {
+            return rotator.GetInfo();
+        }
+
+        public FlatDeviceInfo FlatDeviceInfo() {
+            return flatDevice.GetInfo();
+        }
+
+        public WeatherDataInfo WeatherDataInfo() {
+            return weather.GetInfo();
+        }
+
+        public SafetyMonitorInfo SafetyMonitorInfo() {
+            return safetyMonitor.GetInfo();
         }
 
         public async Task DomeSetShutterOpen(bool open) {
@@ -240,9 +596,9 @@ namespace Plugin.NINA.AstroAppHTTPAPI.Equipment {
                 if (mount.GetInfo().Slewing) {
                     mount.StopSlew();
                 }
-                telescopeTokenSource?.Cancel();
-                telescopeTokenSource = new CancellationTokenSource();
-                await mount.ParkTelescope(progress, telescopeTokenSource.Token);
+                mountTokenSource?.Cancel();
+                mountTokenSource = new CancellationTokenSource();
+                await mount.ParkTelescope(progress, mountTokenSource.Token);
             }
         }
 
@@ -251,9 +607,9 @@ namespace Plugin.NINA.AstroAppHTTPAPI.Equipment {
                 Logger.Info($"TelescopeUnpark: {status.Progress}");
             });
             if (mount.GetInfo().Connected && mount.GetInfo().AtPark) {
-                telescopeTokenSource?.Cancel();
-                telescopeTokenSource = new CancellationTokenSource();
-                await mount.UnparkTelescope(progress, telescopeTokenSource.Token);
+                mountTokenSource?.Cancel();
+                mountTokenSource = new CancellationTokenSource();
+                await mount.UnparkTelescope(progress, mountTokenSource.Token);
             }
         }
 

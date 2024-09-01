@@ -1,6 +1,14 @@
 ﻿using NINA.Equipment.Equipment.MyCamera;
 using NINA.Equipment.Equipment.MyDome;
 using NINA.Equipment.Equipment.MyTelescope;
+using NINA.Equipment.Equipment.MyFilterWheel;
+using NINA.Equipment.Equipment.MyFocuser;
+using NINA.Equipment.Equipment.MyRotator;
+using NINA.Equipment.Equipment.MyGuider;
+using NINA.Equipment.Equipment.MySwitch;
+using NINA.Equipment.Equipment.MyFlatDevice;
+using NINA.Equipment.Equipment.MyWeatherData;
+using NINA.Equipment.Equipment.MySafetyMonitor;
 using Plugin.NINA.AstroAppHTTPAPI.Equipment;
 using System;
 
@@ -124,6 +132,188 @@ namespace Plugin.NINA.AstroAppHTTPAPI.Web {
             };
         }
 
+    }
+
+    public class FilterWheelStatusResponse {
+        public string Type = "FilterWheelStatus";
+        public string Name { get; set; }
+        public string Description { get; set; }
+        public string DeviceId { get; set; }
+        public bool Connected { get; set; }
+        public string Action { get; set; }
+
+        public static FilterWheelStatusResponse FromFilterWheelInfo(FilterWheelInfo info, FilterWheelAction action) {
+            return new FilterWheelStatusResponse {
+                Name = info.Name,
+                Description = info.Description,
+                DeviceId = info.DeviceId,
+                Connected = info.Connected,
+                Action = action.ToString(),
+            };
+        }
+    }
+
+    public class FocuserStatusResponse {
+        public string Type = "FocuserStatus";
+        public string Name { get; set; }
+        public string Description { get; set; }
+        public string DeviceId { get; set; }
+        public bool Connected { get; set; }
+        public int Position { get; set; }
+        public bool TempComp { get; set; }
+        public double Temperature { get; set; }
+        public string Action { get; set; }
+
+        public static FocuserStatusResponse FromFocuserInfo(FocuserInfo info, FocuserAction action) {
+            return new FocuserStatusResponse {
+                Name = info.Name,
+                Description = info.Description,
+                DeviceId = info.DeviceId,
+                Connected = info.Connected,
+                Position = info.Position,
+                TempComp = info.TempComp,
+                Temperature = info.Temperature,
+                Action = action.ToString(),
+            };
+        }
+    }
+
+    public class RotatorStatusResponse {
+        public string Type = "RotatorStatus";
+        public string Name { get; set; }
+        public string Description { get; set; }
+        public string DeviceId { get; set; }
+        public bool Connected { get; set; }
+        public double Position { get; set; }
+        public bool IsMoving { get; set; }
+        public double StepSize { get; set; }
+        public string Action { get; set; }
+
+        public static RotatorStatusResponse FromRotatorInfo(RotatorInfo info, RotatorAction action) {
+            return new RotatorStatusResponse {
+                Name = info.Name,
+                Description = info.Description,
+                DeviceId = info.DeviceId,
+                Connected = info.Connected,
+                Position = info.Position,
+                IsMoving = info.IsMoving,
+                StepSize = info.StepSize,
+                Action = action.ToString(),
+            };
+        }
+    }
+
+    public class GuiderStatusResponse {
+        public string Type = "GuiderStatus";
+        public string Name { get; set; }
+        public string Description { get; set; }
+        public string DeviceId { get; set; }
+        public bool Connected { get; set; }
+        public string Action { get; set; }
+
+        public static GuiderStatusResponse FromGuiderInfo(GuiderInfo info, GuiderAction action) {
+            return new GuiderStatusResponse {
+                Name = info.Name,
+                Description = info.Description,
+                DeviceId = info.DeviceId,
+                Connected = info.Connected,
+                Action = action.ToString(),
+            };
+        }
+    }
+
+    public class SwitchStatusResponse {
+        public string Type = "SwitchStatus";
+        public string Name { get; set; }
+        public string Description { get; set; }
+        public string DeviceId { get; set; }
+        public bool Connected { get; set; }
+        public string Action { get; set; }
+
+        public static SwitchStatusResponse FromSwitchInfo(SwitchInfo info, SwitchAction action) {
+            return new SwitchStatusResponse {
+                Name = info.Name,
+                Description = info.Description,
+                DeviceId = info.DeviceId,
+                Connected = info.Connected,
+                Action = action.ToString(),
+            };
+        }
+    }
+
+    public class FlatDeviceStatusResponse {
+        public string Type = "FlatDeviceStatus";
+        public string Name { get; set; }
+        public string Description { get; set; }
+        public string DeviceId { get; set; }
+        public bool Connected { get; set; }
+        public string Action { get; set; }
+
+        public static FlatDeviceStatusResponse FromFlatDeviceInfo(FlatDeviceInfo info, FlatDeviceAction action) {
+            return new FlatDeviceStatusResponse {
+                Name = info.Name,
+                Description = info.Description,
+                DeviceId = info.DeviceId,
+                Connected = info.Connected,
+                Action = action.ToString(),
+            };
+        }
+    }
+
+    public class WeatherStatusResponse {
+        public string Type = "WeatherStatus";
+        public string Name { get; set; }
+        public string Description { get; set; }
+        public string DeviceId { get; set; }
+        public bool Connected { get; set; }
+        public double Temperature { get; set; }
+        public double Humidity { get; set; }
+        public double DewPoint { get; set; }
+        public double WindSpeed { get; set; }
+        public double WindDirection { get; set; }
+        public double Pressure { get; set; }
+        public double SkyBrightness { get; set; }
+        public double RainRate { get; set; }
+        public double CloudCover { get; set; }
+        public string Action { get; set; }
+
+        public static WeatherStatusResponse FromWeatherInfo(WeatherDataInfo info, WeatherAction action) {
+            return new WeatherStatusResponse {
+                Name = info.Name,
+                Description = info.Description,
+                DeviceId = info.DeviceId,
+                Connected = info.Connected,
+                Temperature = info.Temperature,
+                Humidity = info.Humidity,
+                DewPoint = info.DewPoint,
+                WindSpeed = info.WindSpeed,
+                WindDirection = info.WindDirection,
+                Pressure = info.Pressure,
+                SkyBrightness = info.SkyBrightness,
+                RainRate = info.RainRate,
+                CloudCover = info.CloudCover,
+                Action = action.ToString(),
+            };
+        }
+    }
+
+    public class SafetyMonitorStatusResponse {
+        public string Type = "SafetyMonitorStatus";
+        public string Name { get; set; }
+        public string Description { get; set; }
+        public string DeviceId { get; set; }
+        public bool Connected { get; set; }
+        public string Action { get; set; }
+
+        public static SafetyMonitorStatusResponse FromSafetyMonitorInfo(SafetyMonitorInfo info, SafetyMonitorAction action) {
+            return new SafetyMonitorStatusResponse {
+                Name = info.Name,
+                Description = info.Description,
+                DeviceId = info.DeviceId,
+                Connected = info.Connected,
+                Action = action.ToString(),
+            };
+        }
     }
 
     public class WebSocketConnectedResponse {

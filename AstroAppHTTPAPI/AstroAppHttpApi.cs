@@ -35,7 +35,16 @@ namespace Plugin.NINA.AstroAppHTTPAPI {
                 IApplicationStatusMediator statusMediator,
                 ICameraMediator camera,
                 IDomeMediator dome,
-                ITelescopeMediator telescope) {
+                IFilterWheelMediator filterWheel,
+                IFocuserMediator focuser,
+                IGuiderMediator guider,
+                ISwitchMediator switches,
+                IRotatorMediator rotator,
+                IFlatDeviceMediator flatDevice,
+                IWeatherDataMediator weather,
+                ISafetyMonitorMediator safetyMonitor,
+                ITelescopeMediator mount
+        ) {
             if (Settings.Default.UpdateSettings) {
                 Settings.Default.Upgrade();
                 Settings.Default.UpdateSettings = false;
@@ -48,7 +57,20 @@ namespace Plugin.NINA.AstroAppHTTPAPI {
                 ApiKey = GenerateRandomKey();
             }
 
-            equipmentManager = new EquipmentManager(statusMediator, camera, dome, telescope);
+            equipmentManager = new EquipmentManager(
+                statusMediator,
+                camera,
+                dome,
+                filterWheel,
+                focuser,
+                guider,
+                switches,
+                rotator,
+                flatDevice,
+                weather,
+                safetyMonitor,
+                mount
+            );
             serverManager = new WebServerManager(Port, ApiKey, equipmentManager);
 
             if (WebServerEnabled) {

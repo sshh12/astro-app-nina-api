@@ -36,7 +36,13 @@ namespace Plugin.NINA.AstroAppHTTPAPI.Web {
                 .WithModule(new BasicAuthenticationModule("/").WithAccount("user", apiKey))
                 .WithWebApi("/api/v1/camera", m => m.WithController(() => new CameraRouteController(null, equipmentManager)))
                 .WithWebApi("/api/v1/dome", m => m.WithController(() => new DomeRouteController(null, equipmentManager)))
-                .WithWebApi("/api/v1/mount", m => m.WithController(() => new MountRouteController(null, equipmentManager)));
+                .WithWebApi("/api/v1/mount", m => m.WithController(() => new MountRouteController(null, equipmentManager)))
+                .WithWebApi("/api/v1/rotator", m => m.WithController(() => new RotatorRouteController(null, equipmentManager)))
+                .WithWebApi("/api/v1/focuser", m => m.WithController(() => new FocuserRouteController(null, equipmentManager)))
+                .WithWebApi("/api/v1/filterwheel", m => m.WithController(() => new FilterWheelRouteController(null, equipmentManager)))
+                .WithWebApi("/api/v1/flatdevice", m => m.WithController(() => new FlatDeviceRouteController(null, equipmentManager)))
+                .WithWebApi("/api/v1/safetymonitor", m => m.WithController(() => new SafetyMonitorController(null, equipmentManager)))
+                .WithWebApi("/api/v1/weather", m => m.WithController(() => new WeatherRouteController(null, equipmentManager)));
         }
 
         public void Start() {

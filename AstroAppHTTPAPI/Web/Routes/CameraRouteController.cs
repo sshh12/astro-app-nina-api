@@ -10,7 +10,7 @@ namespace Plugin.NINA.AstroAppHTTPAPI.Web {
         public CameraRouteController(IHttpContext context, EquipmentManager equipmentManager) : base(context, equipmentManager) { }
 
         [Route(HttpVerbs.Get, "/")]
-        public async Task CameraStatus() {
+        public void CameraStatus() {
             var info = equipmentManager.CameraInfo();
             var response = CameraStatusResponse.FromCameraInfo(info, CameraAction.NONE);
             RespondWithJSON(response);

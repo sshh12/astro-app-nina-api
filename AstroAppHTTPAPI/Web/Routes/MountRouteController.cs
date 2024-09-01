@@ -9,7 +9,7 @@ namespace Plugin.NINA.AstroAppHTTPAPI.Web {
         public MountRouteController(IHttpContext context, EquipmentManager equipmentManager) : base(context, equipmentManager) { }
 
         [Route(HttpVerbs.Get, "/")]
-        public async Task MountStatus() {
+        public void MountStatus() {
             var info = equipmentManager.MountInfo();
             var response = MountStatusResponse.FromMountInfo(info, MountAction.NONE);
             RespondWithJSON(response);

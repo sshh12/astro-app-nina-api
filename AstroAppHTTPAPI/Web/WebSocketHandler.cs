@@ -20,6 +20,12 @@ namespace Plugin.NINA.AstroAppHTTPAPI.Web {
             this.equipmentManager.CameraUpdated += async (object sender, CameraEventArgs e) => await PostCameraStatus(e);
             this.equipmentManager.DomeUpdated += async (object sender, DomeEventArgs e) => await PostDomeStatus(e);
             this.equipmentManager.MountUpdated += async (object sender, MountEventArgs e) => await PostMountStatus(e);
+            this.equipmentManager.FilterWheelUpdated += async (object sender, FilterWheelEventArgs e) => await PostFilterWheelStatus(e);
+            this.equipmentManager.FocuserUpdated += async (object sender, FocuserEventArgs e) => await PostFocuserStatus(e);
+            this.equipmentManager.GuiderUpdated += async (object sender, GuiderEventArgs e) => await PostGuiderStatus(e);
+            this.equipmentManager.RotatorUpdated += async (object sender, RotatorEventArgs e) => await PostRotatorStatus(e);
+            this.equipmentManager.FlatDeviceUpdated += async (object sender, FlatDeviceEventArgs e) => await PostFlatDeviceStatus(e);
+            this.equipmentManager.WeatherUpdated += async (object sender, WeatherEventArgs e) => await PostWeatherStatus(e);
             this.apiKey = apiKey;
             jsonSettings = new JsonSerializerSettings {
                 NullValueHandling = NullValueHandling.Include
@@ -45,6 +51,48 @@ namespace Plugin.NINA.AstroAppHTTPAPI.Web {
             await BroadcastAuthedClientsAsync(JsonConvert.SerializeObject(response, jsonSettings));
         }
 
+        private async Task PostFilterWheelStatus(FilterWheelEventArgs e) {
+            var info = equipmentManager.FilterWheelInfo();
+            var response = FilterWheelStatusResponse.FromFilterWheelInfo(info, e.Action);
+            await BroadcastAuthedClientsAsync(JsonConvert.SerializeObject(response, jsonSettings));
+        }
+
+        private async Task PostFocuserStatus(FocuserEventArgs e) {
+            var info = equipmentManager.FocuserInfo();
+            var response = FocuserStatusResponse.FromFocuserInfo(info, e.Action);
+            await BroadcastAuthedClientsAsync(JsonConvert.SerializeObject(response, jsonSettings));
+        }
+
+        private async Task PostGuiderStatus(GuiderEventArgs e) {
+            var info = equipmentManager.GuiderInfo();
+            var response = GuiderStatusResponse.FromGuiderInfo(info, e.Action);
+            await BroadcastAuthedClientsAsync(JsonConvert.SerializeObject(response, jsonSettings));
+        }
+
+        private async Task PostRotatorStatus(RotatorEventArgs e) {
+            var info = equipmentManager.RotatorInfo();
+            var response = RotatorStatusResponse.FromRotatorInfo(info, e.Action);
+            await BroadcastAuthedClientsAsync(JsonConvert.SerializeObject(response, jsonSettings));
+        }
+
+        private async Task PostFlatDeviceStatus(FlatDeviceEventArgs e) {
+            var info = equipmentManager.FlatDeviceInfo();
+            var response = FlatDeviceStatusResponse.FromFlatDeviceInfo(info, e.Action);
+            await BroadcastAuthedClientsAsync(JsonConvert.SerializeObject(response, jsonSettings));
+        }
+
+        private async Task PostWeatherStatus(WeatherEventArgs e) {
+            var info = equipmentManager.WeatherDataInfo();
+            var response = WeatherStatusResponse.FromWeatherInfo(info, e.Action);
+            await BroadcastAuthedClientsAsync(JsonConvert.SerializeObject(response, jsonSettings));
+        }
+
+        private async Task PostSafetyMonitorStatus(SafetyMonitorEventArgs e) {
+            var info = equipmentManager.SafetyMonitorInfo();
+            var response = SafetyMonitorStatusResponse.FromSafetyMonitorInfo(info, e.Action);
+            await BroadcastAuthedClientsAsync(JsonConvert.SerializeObject(response, jsonSettings));
+        }
+
         public async Task BroadcastAuthedClientsAsync(string message) {
             await BroadcastAsync(message, (client) => authedClients.Contains(client.Id));
         }
@@ -53,7 +101,14 @@ namespace Plugin.NINA.AstroAppHTTPAPI.Web {
             Task.WaitAll(
                 PostCameraStatus(new CameraEventArgs(CameraAction.NONE)),
                 PostDomeStatus(new DomeEventArgs(DomeAction.NONE)),
-                PostMountStatus(new MountEventArgs(MountAction.NONE))
+                PostMountStatus(new MountEventArgs(MountAction.NONE)),
+                PostFilterWheelStatus(new FilterWheelEventArgs(FilterWheelAction.NONE)),
+                PostFocuserStatus(new FocuserEventArgs(FocuserAction.NONE)),
+                PostGuiderStatus(new GuiderEventArgs(GuiderAction.NONE)),
+                PostRotatorStatus(new RotatorEventArgs(RotatorAction.NONE)),
+                PostFlatDeviceStatus(new FlatDeviceEventArgs(FlatDeviceAction.NONE)),
+                PostWeatherStatus(new WeatherEventArgs(WeatherAction.NONE)),
+                PostSafetyMonitorStatus(new SafetyMonitorEventArgs(SafetyMonitorAction.NONE))
             );
         }
 

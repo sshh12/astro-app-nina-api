@@ -10,7 +10,7 @@ namespace Plugin.NINA.AstroAppHTTPAPI.Web {
         public DomeRouteController(IHttpContext context, EquipmentManager equipmentManager) : base(context, equipmentManager) { }
 
         [Route(HttpVerbs.Get, "/")]
-        public async Task DomeStatus() {
+        public void DomeStatus() {
             var info = equipmentManager.DomeInfo();
             var response = DomeStatusResponse.FromDomeInfo(info, DomeAction.NONE);
             RespondWithJSON(response);
