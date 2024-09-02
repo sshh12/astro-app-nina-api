@@ -42,7 +42,8 @@ namespace Plugin.NINA.AstroAppHTTPAPI.Web {
 
         private async Task PostDomeStatus(DomeEventArgs e) {
             var info = equipmentManager.DomeInfo();
-            var response = DomeStatusResponse.FromDomeInfo(info, e.Action);
+            var following = equipmentManager.DomeIsFollowing();
+            var response = DomeStatusResponse.FromDomeInfo(info, following, e.Action);
             await BroadcastAuthedClientsAsync(JsonConvert.SerializeObject(response, jsonSettings));
         }
 

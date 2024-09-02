@@ -11,6 +11,7 @@ using NINA.Equipment.Equipment.MyWeatherData;
 using NINA.Equipment.Equipment.MySafetyMonitor;
 using Plugin.NINA.AstroAppHTTPAPI.Equipment;
 using System;
+using NINA.Core.Model.Equipment;
 
 namespace Plugin.NINA.AstroAppHTTPAPI.Web {
 
@@ -69,9 +70,10 @@ namespace Plugin.NINA.AstroAppHTTPAPI.Web {
         public string ShutterStatus { get; set; }
         public double Azimuth { get; set; }
         public bool Slewing { get; set; }
+        public bool IsFollowingScope { get; set; }
         public string Action { get; set; }
 
-        public static DomeStatusResponse FromDomeInfo(DomeInfo info, DomeAction action) {
+        public static DomeStatusResponse FromDomeInfo(DomeInfo info, bool following, DomeAction action) {
             return new DomeStatusResponse {
                 Name = info.Name,
                 Description = info.Description,
@@ -79,6 +81,7 @@ namespace Plugin.NINA.AstroAppHTTPAPI.Web {
                 Connected = info.Connected,
                 AtHome = info.AtHome,
                 AtPark = info.AtPark,
+                IsFollowingScope = following,
                 DriverFollowing = info.DriverFollowing,
                 ShutterStatus = info.ShutterStatus.ToString(),
                 Azimuth = info.Azimuth,
@@ -98,6 +101,7 @@ namespace Plugin.NINA.AstroAppHTTPAPI.Web {
         public bool Slewing { get; set; }
         public bool TrackingEnabled { get; set; }
         public string TrackingMode { get; set; }
+        public string[] TrackingModes { get; set; }
         public bool AtHome { get; set; }
         public bool AtPark { get; set; }
         public double RightAscension { get; set; }
@@ -107,6 +111,7 @@ namespace Plugin.NINA.AstroAppHTTPAPI.Web {
         public string SideOfPier { get; set; }
         public double SiteLatitude { get; set; }
         public double SiteLongitude { get; set; }
+        public double SiteElevation { get; set; }
         public string Action { get; set; }
 
         public static MountStatusResponse FromMountInfo(TelescopeInfo info, MountAction action) {
@@ -119,6 +124,7 @@ namespace Plugin.NINA.AstroAppHTTPAPI.Web {
                 Slewing = info.Slewing,
                 TrackingEnabled = info.TrackingEnabled,
                 TrackingMode = info.TrackingRate.TrackingMode.ToString(),
+                TrackingModes = info.TrackingRate.TrackingMode.GetType().GetEnumNames(),
                 AtHome = info.AtHome,
                 AtPark = info.AtPark,
                 RightAscension = info.RightAscension,
@@ -128,10 +134,30 @@ namespace Plugin.NINA.AstroAppHTTPAPI.Web {
                 SideOfPier = info.SideOfPier.ToString(),
                 SiteLatitude = info.SiteLatitude,
                 SiteLongitude = info.SiteLongitude,
+                SiteElevation = info.SiteElevation,
                 Action = action.ToString(),
             };
         }
 
+    }
+
+    public class Filter {
+        public string Name { get; set; }
+        public short Position { get; set; }
+
+        public static Filter FromFilterInfo(FilterInfo info) {
+            return new Filter {
+                Name = info.Name,
+                Position = info.Position,
+            };
+        }
+
+        public static Filter Empty() {
+            return new Filter {
+                Name = "Unknown",
+                Position = 0,
+            };
+        }
     }
 
     public class FilterWheelStatusResponse {
@@ -140,6 +166,7 @@ namespace Plugin.NINA.AstroAppHTTPAPI.Web {
         public string Description { get; set; }
         public string DeviceId { get; set; }
         public bool Connected { get; set; }
+        public Filter SelectedFilter { get; set; }
         public string Action { get; set; }
 
         public static FilterWheelStatusResponse FromFilterWheelInfo(FilterWheelInfo info, FilterWheelAction action) {
@@ -148,6 +175,7 @@ namespace Plugin.NINA.AstroAppHTTPAPI.Web {
                 Description = info.Description,
                 DeviceId = info.DeviceId,
                 Connected = info.Connected,
+                SelectedFilter = info.SelectedFilter == null ? Filter.Empty() : Filter.FromFilterInfo(info.SelectedFilter),
                 Action = action.ToString(),
             };
         }

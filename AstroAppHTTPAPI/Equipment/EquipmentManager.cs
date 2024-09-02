@@ -9,13 +9,16 @@ using NINA.Equipment.Equipment.MyGuider;
 using NINA.Equipment.Equipment.MySwitch;
 using NINA.Equipment.Equipment.MyRotator;
 using NINA.Equipment.Equipment.MyFlatDevice;
+using NINA.Core.Model.Equipment;
 using NINA.Equipment.Equipment.MyWeatherData;
 using NINA.Equipment.Equipment.MySafetyMonitor;
 using NINA.Equipment.Interfaces.Mediator;
 using NINA.WPF.Base.Interfaces.Mediator;
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using NINA.Astrometry;
 
 namespace Plugin.NINA.AstroAppHTTPAPI.Equipment {
 
@@ -44,6 +47,7 @@ namespace Plugin.NINA.AstroAppHTTPAPI.Equipment {
         PARKED = 6,
         SLEWED = 7,
         HOMED = 8,
+        FOLLOWING_UPDATED = 9,
     }
 
 
@@ -76,7 +80,8 @@ namespace Plugin.NINA.AstroAppHTTPAPI.Equipment {
     public enum FilterWheelAction {
         NONE = 0,
         CONNECTED = 1,
-        DISCONNECTED = 2
+        DISCONNECTED = 2,
+        FILTER_CHANGED = 3
     }
 
     public class FilterWheelEventArgs : EventArgs {
@@ -90,7 +95,8 @@ namespace Plugin.NINA.AstroAppHTTPAPI.Equipment {
     public enum FocuserAction {
         NONE = 0,
         CONNECTED = 1,
-        DISCONNECTED = 2
+        DISCONNECTED = 2,
+        POSITION_UPDATED = 3
     }
 
     public class FocuserEventArgs : EventArgs {
@@ -200,6 +206,8 @@ namespace Plugin.NINA.AstroAppHTTPAPI.Equipment {
         private ITelescopeMediator mount;
         private static CancellationTokenSource domeTokenSource;
         private static CancellationTokenSource mountTokenSource;
+        private static CancellationTokenSource filterWheelTokenSource;
+        private static CancellationTokenSource focuserTokenSource;
         public event EventHandler<CameraEventArgs> CameraUpdated;
         public event EventHandler<DomeEventArgs> DomeUpdated;
         public event EventHandler<MountEventArgs> MountUpdated;
@@ -300,6 +308,10 @@ namespace Plugin.NINA.AstroAppHTTPAPI.Equipment {
             };
             this.filterWheel.Disconnected += (sender, e) => {
                 FilterWheelUpdated?.Invoke(this, new FilterWheelEventArgs(FilterWheelAction.DISCONNECTED));
+                return Task.CompletedTask;
+            };
+            this.filterWheel.FilterChanged += (sender, e) => {
+                FilterWheelUpdated?.Invoke(this, new FilterWheelEventArgs(FilterWheelAction.FILTER_CHANGED));
                 return Task.CompletedTask;
             };
             this.focuser = focuser;
@@ -618,6 +630,57 @@ namespace Plugin.NINA.AstroAppHTTPAPI.Equipment {
                 domeTokenSource?.Cancel();
                 domeTokenSource = new CancellationTokenSource();
                 await dome.FindHome(domeTokenSource.Token);
+            }
+        }
+
+        public bool DomeIsFollowing() {
+            return dome.IsFollowingScope;
+        }
+
+        public async Task DomeSetFollowing(bool following) {
+            if (dome.GetInfo().Connected) {
+                domeTokenSource?.Cancel();
+                domeTokenSource = new CancellationTokenSource();
+                if (following) {
+                    await dome.EnableFollowing(domeTokenSource.Token);
+                } else {
+                    await dome.DisableFollowing(domeTokenSource.Token);
+                }
+            }
+        }
+
+        public async Task DomeSyncToMount() {
+            if (dome.GetInfo().Connected && mount.GetInfo().Connected) {
+                domeTokenSource?.Cancel();
+                domeTokenSource = new CancellationTokenSource();
+                await dome.SyncToScopeCoordinates(mount.GetCurrentPosition(), mount.GetInfo().SideOfPier, domeTokenSource.Token);
+            }
+        }
+
+        public async Task ScopeSlew(double ra, double dec, Epoch epoch, Coordinates.RAType ratype) {
+            if (mount.GetInfo().Connected) {
+                var coords = new Coordinates(ra, dec, epoch, ratype);
+                mountTokenSource?.Cancel();
+                mountTokenSource = new CancellationTokenSource();
+                await mount.SlewToCoordinatesAsync(coords, mountTokenSource.Token);
+            }
+        }
+
+        public async Task FilterWheelSetFilter(short pos) {
+            if (filterWheel.GetInfo().Connected) {
+                filterWheelTokenSource?.Cancel();
+                filterWheelTokenSource = new CancellationTokenSource();
+                // TODO: Do we need an offset?
+                var filter = new FilterInfo("", 0, pos);
+                await filterWheel.ChangeFilter(filter, filterWheelTokenSource.Token);
+            }
+        }
+
+        public async Task FocuserSetPosition(int pos) {
+            if (focuser.GetInfo().Connected) {
+                focuserTokenSource?.Cancel();
+                focuserTokenSource = new CancellationTokenSource();
+                await focuser.MoveFocuser(pos, focuserTokenSource.Token);
             }
         }
     }

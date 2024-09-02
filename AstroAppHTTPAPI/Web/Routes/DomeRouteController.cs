@@ -9,67 +9,70 @@ namespace Plugin.NINA.AstroAppHTTPAPI.Web {
 
         public DomeRouteController(IHttpContext context, EquipmentManager equipmentManager) : base(context, equipmentManager) { }
 
+        private void respondWithInfo(DomeAction action) {
+            var info = equipmentManager.DomeInfo();
+            var following = equipmentManager.DomeIsFollowing();
+            var response = DomeStatusResponse.FromDomeInfo(info, following, action);
+            RespondWithJSON(response);
+        }
+
         [Route(HttpVerbs.Get, "/")]
         public void DomeStatus() {
-            var info = equipmentManager.DomeInfo();
-            var response = DomeStatusResponse.FromDomeInfo(info, DomeAction.NONE);
-            RespondWithJSON(response);
+            respondWithInfo(DomeAction.NONE);
         }
 
         [Route(HttpVerbs.Post, "/connect")]
         public async Task DomeConnect() {
             await equipmentManager.DomeConnect();
-            var info = equipmentManager.DomeInfo();
-            var response = DomeStatusResponse.FromDomeInfo(info, DomeAction.CONNECTED);
-            RespondWithJSON(response);
+            respondWithInfo(DomeAction.CONNECTED);
         }
 
         [Route(HttpVerbs.Post, "/disconnect")]
         public async Task DomeDisconnect() {
             await equipmentManager.DomeDisconnect();
-            var info = equipmentManager.DomeInfo();
-            var response = DomeStatusResponse.FromDomeInfo(info, DomeAction.DISCONNECTED);
-            RespondWithJSON(response);
+            respondWithInfo(DomeAction.DISCONNECTED);
         }
 
         [Route(HttpVerbs.Post, "/open")]
         public async Task DomeOpen() {
             await equipmentManager.DomeSetShutterOpen(true);
-            var info = equipmentManager.DomeInfo();
-            var response = DomeStatusResponse.FromDomeInfo(info, DomeAction.OPENED);
-            RespondWithJSON(response);
+            respondWithInfo(DomeAction.OPENED);
         }
 
         [Route(HttpVerbs.Post, "/close")]
         public async Task DomeClose() {
             await equipmentManager.DomeSetShutterOpen(false);
-            var info = equipmentManager.DomeInfo();
-            var response = DomeStatusResponse.FromDomeInfo(info, DomeAction.CLOSED);
-            RespondWithJSON(response);
+            respondWithInfo(DomeAction.CLOSED);
         }
 
         [Route(HttpVerbs.Post, "/rotate")]
         public async Task DomeSlew([JsonData] DomeSlewRequest request) {
             await equipmentManager.DomeSlew(request.Azimuth);
-            var info = equipmentManager.DomeInfo();
-            var response = DomeStatusResponse.FromDomeInfo(info, DomeAction.SLEWED);
-            RespondWithJSON(response);
+            respondWithInfo(DomeAction.SLEWED);
         }
 
         [Route(HttpVerbs.Post, "/park")]
         public async Task DomePark() {
             await equipmentManager.DomePark();
-            var info = equipmentManager.DomeInfo();
-            var response = DomeStatusResponse.FromDomeInfo(info, DomeAction.PARKED);
-            RespondWithJSON(response);
+            respondWithInfo(DomeAction.PARKED);
         }
 
         [Route(HttpVerbs.Post, "/home")]
         public async Task DomeHome() {
             await equipmentManager.DomeFindHome();
-            var info = equipmentManager.DomeInfo();
-            var response = DomeStatusResponse.FromDomeInfo(info, DomeAction.HOMED);
-            RespondWithJSON(response);
+            respondWithInfo(DomeAction.HOMED);
+        }
+
+        [Route(HttpVerbs.Post, "/sync")]
+        public async Task DomeSync() {
+            await equipmentManager.DomeSyncToMount();
+            respondWithInfo(DomeAction.SYNCED);
+        }
+
+        [Route(HttpVerbs.Patch, "/following")]
+        public async Task DomeSetFollowing([JsonData] DomeFollowingRequest request) {
+            await equipmentManager.DomeSetFollowing(request.Enabled);
+            respondWithInfo(DomeAction.FOLLOWING_UPDATED);
         }
     }
 }
