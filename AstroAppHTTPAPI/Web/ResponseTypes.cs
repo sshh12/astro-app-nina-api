@@ -12,6 +12,9 @@ using NINA.Equipment.Equipment.MySafetyMonitor;
 using Plugin.NINA.AstroAppHTTPAPI.Equipment;
 using System;
 using NINA.Core.Model.Equipment;
+using NINA.Equipment.Interfaces;
+using System.Collections.Immutable;
+using System.Linq;
 
 namespace Plugin.NINA.AstroAppHTTPAPI.Web {
 
@@ -30,6 +33,7 @@ namespace Plugin.NINA.AstroAppHTTPAPI.Web {
         public short BinY { get; set; }
         public int XSize { get; set; }
         public int YSize { get; set; }
+        public double? PixelSize { get; set; }
         public string SensorType { get; set; }
         public string Action { get; set; }
 
@@ -50,6 +54,7 @@ namespace Plugin.NINA.AstroAppHTTPAPI.Web {
                 BinY = info.BinY,
                 XSize = info.XSize,
                 YSize = info.YSize,
+                PixelSize = Double.IsNaN(info.PixelSize) ? null : info.PixelSize,
                 SensorType = info.SensorType.ToString(),
                 Action = action.ToString(),
             };
@@ -112,6 +117,11 @@ namespace Plugin.NINA.AstroAppHTTPAPI.Web {
         public double SiteLatitude { get; set; }
         public double SiteLongitude { get; set; }
         public double SiteElevation { get; set; }
+        public string AlignmentMode { get; set; }
+        public bool IsPulseGuiding { get; set; }
+        public string SiderealTime { get; set; }
+        public double? GuideRateDeclination { get; set; }
+        public double? GuideRateRightAscension { get; set; }
         public string Action { get; set; }
 
         public static MountStatusResponse FromMountInfo(TelescopeInfo info, MountAction action) {
@@ -135,6 +145,11 @@ namespace Plugin.NINA.AstroAppHTTPAPI.Web {
                 SiteLatitude = info.SiteLatitude,
                 SiteLongitude = info.SiteLongitude,
                 SiteElevation = info.SiteElevation,
+                AlignmentMode = info.AlignmentMode.ToString(),
+                IsPulseGuiding = info.IsPulseGuiding,
+                SiderealTime = info.SiderealTimeString,
+                GuideRateDeclination = Double.IsNaN(info.GuideRateDeclinationArcsecPerSec) ? null : info.GuideRateDeclinationArcsecPerSec,
+                GuideRateRightAscension = Double.IsNaN(info.GuideRateRightAscensionArcsecPerSec) ? null : info.GuideRateRightAscensionArcsecPerSec,
                 Action = action.ToString(),
             };
         }
@@ -189,7 +204,9 @@ namespace Plugin.NINA.AstroAppHTTPAPI.Web {
         public bool Connected { get; set; }
         public int Position { get; set; }
         public bool TempComp { get; set; }
+        public bool TempCompAvailable { get; set; }
         public double? Temperature { get; set; }
+        public double? StepSize { get; set; }
         public string Action { get; set; }
 
         public static FocuserStatusResponse FromFocuserInfo(FocuserInfo info, FocuserAction action) {
@@ -200,7 +217,9 @@ namespace Plugin.NINA.AstroAppHTTPAPI.Web {
                 Connected = info.Connected,
                 Position = info.Position,
                 TempComp = info.TempComp,
+                TempCompAvailable = info.TempCompAvailable,
                 Temperature = Double.IsNaN(info.Temperature) ? null : info.Temperature,
+                StepSize = Double.IsNaN(info.StepSize) ? null : info.StepSize,
                 Action = action.ToString(),
             };
         }
@@ -212,9 +231,11 @@ namespace Plugin.NINA.AstroAppHTTPAPI.Web {
         public string Description { get; set; }
         public string DeviceId { get; set; }
         public bool Connected { get; set; }
-        public double Position { get; set; }
+        public double? Position { get; set; }
         public bool IsMoving { get; set; }
-        public double StepSize { get; set; }
+        public double? StepSize { get; set; }
+        public float? MechanicalPosition { get; set; }
+        public bool Reverse { get; set; }
         public string Action { get; set; }
 
         public static RotatorStatusResponse FromRotatorInfo(RotatorInfo info, RotatorAction action) {
@@ -223,9 +244,11 @@ namespace Plugin.NINA.AstroAppHTTPAPI.Web {
                 Description = info.Description,
                 DeviceId = info.DeviceId,
                 Connected = info.Connected,
-                Position = info.Position,
+                Position = Double.IsNaN(info.Position) ? null : info.Position,
                 IsMoving = info.IsMoving,
-                StepSize = info.StepSize,
+                StepSize = Double.IsNaN(info.StepSize) ? null : info.StepSize,
+                MechanicalPosition = float.IsNaN(info.MechanicalPosition) ? null : info.MechanicalPosition,
+                Reverse = info.Reverse,
                 Action = action.ToString(),
             };
         }
@@ -237,6 +260,7 @@ namespace Plugin.NINA.AstroAppHTTPAPI.Web {
         public string Description { get; set; }
         public string DeviceId { get; set; }
         public bool Connected { get; set; }
+        public double? PixelScale { get; set; }
         public string Action { get; set; }
 
         public static GuiderStatusResponse FromGuiderInfo(GuiderInfo info, GuiderAction action) {
@@ -245,7 +269,22 @@ namespace Plugin.NINA.AstroAppHTTPAPI.Web {
                 Description = info.Description,
                 DeviceId = info.DeviceId,
                 Connected = info.Connected,
+                PixelScale = Double.IsNaN(info.PixelScale) ? null : info.PixelScale,
                 Action = action.ToString(),
+            };
+        }
+    }
+
+    public class Gauge {
+        public string Name { get; set; }
+        public string Description { get; set; }
+        public double? Value { get; set; }
+
+        public static Gauge FromSwitch(ISwitch info) {
+            return new Gauge {
+                Name = info.Name,
+                Description = info.Description,
+                Value = Double.IsNaN(info.Value) ? null : info.Value,
             };
         }
     }
@@ -256,6 +295,7 @@ namespace Plugin.NINA.AstroAppHTTPAPI.Web {
         public string Description { get; set; }
         public string DeviceId { get; set; }
         public bool Connected { get; set; }
+        public Gauge[] Gauges { get; set; }
         public string Action { get; set; }
 
         public static SwitchStatusResponse FromSwitchInfo(SwitchInfo info, SwitchAction action) {
@@ -264,6 +304,7 @@ namespace Plugin.NINA.AstroAppHTTPAPI.Web {
                 Description = info.Description,
                 DeviceId = info.DeviceId,
                 Connected = info.Connected,
+                Gauges = info.ReadonlySwitches?.ToImmutableList().Select(s => Gauge.FromSwitch(s)).ToArray(),
                 Action = action.ToString(),
             };
         }
@@ -275,6 +316,11 @@ namespace Plugin.NINA.AstroAppHTTPAPI.Web {
         public string Description { get; set; }
         public string DeviceId { get; set; }
         public bool Connected { get; set; }
+        public int Brightness { get; set; }
+        public int MaxBrightness { get; set; }
+        public int MinBrightness { get; set; }
+        public string CoverState { get; set; }
+        public bool LightOn { get; set; }
         public string Action { get; set; }
 
         public static FlatDeviceStatusResponse FromFlatDeviceInfo(FlatDeviceInfo info, FlatDeviceAction action) {
@@ -283,6 +329,11 @@ namespace Plugin.NINA.AstroAppHTTPAPI.Web {
                 Description = info.Description,
                 DeviceId = info.DeviceId,
                 Connected = info.Connected,
+                Brightness = info.Brightness,
+                MaxBrightness = info.MaxBrightness,
+                MinBrightness = info.MinBrightness,
+                CoverState = info.CoverState.ToString(),
+                LightOn = info.LightOn,
                 Action = action.ToString(),
             };
         }
@@ -300,9 +351,11 @@ namespace Plugin.NINA.AstroAppHTTPAPI.Web {
         public double? WindSpeed { get; set; }
         public double? WindDirection { get; set; }
         public double? Pressure { get; set; }
+        public double? SkyQuality { get; set; }
         public double? SkyBrightness { get; set; }
         public double? RainRate { get; set; }
         public double? CloudCover { get; set; }
+        public double? StarFWHM { get; set; }
         public string Action { get; set; }
 
         public static WeatherStatusResponse FromWeatherInfo(WeatherDataInfo info, WeatherAction action) {
@@ -317,9 +370,11 @@ namespace Plugin.NINA.AstroAppHTTPAPI.Web {
                 WindSpeed = Double.IsNaN(info.WindSpeed) ? null : info.WindSpeed,
                 WindDirection = Double.IsNaN(info.WindDirection) ? null : info.WindDirection,
                 Pressure = Double.IsNaN(info.Pressure) ? null : info.Pressure,
+                SkyQuality = Double.IsNaN(info.SkyQuality) ? null : info.SkyQuality,
                 SkyBrightness = Double.IsNaN(info.SkyBrightness) ? null : info.SkyBrightness,
                 RainRate = Double.IsNaN(info.RainRate) ? null : info.RainRate,
                 CloudCover = Double.IsNaN(info.CloudCover) ? null : info.CloudCover,
+                StarFWHM = Double.IsNaN(info.StarFWHM) ? null : info.StarFWHM,
                 Action = action.ToString(),
             };
         }
@@ -331,6 +386,7 @@ namespace Plugin.NINA.AstroAppHTTPAPI.Web {
         public string Description { get; set; }
         public string DeviceId { get; set; }
         public bool Connected { get; set; }
+        public bool IsSafe { get; set; }
         public string Action { get; set; }
 
         public static SafetyMonitorStatusResponse FromSafetyMonitorInfo(SafetyMonitorInfo info, SafetyMonitorAction action) {
@@ -339,6 +395,7 @@ namespace Plugin.NINA.AstroAppHTTPAPI.Web {
                 Description = info.Description,
                 DeviceId = info.DeviceId,
                 Connected = info.Connected,
+                IsSafe = info.IsSafe,
                 Action = action.ToString(),
             };
         }

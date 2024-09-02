@@ -110,7 +110,9 @@ namespace Plugin.NINA.AstroAppHTTPAPI.Equipment {
     public enum GuiderAction {
         NONE = 0,
         CONNECTED = 1,
-        DISCONNECTED = 2
+        DISCONNECTED = 2,
+        GUIDING_STARTED = 3,
+        GUIDING_STOPPED = 4
     }
 
     public class GuiderEventArgs : EventArgs {
@@ -138,7 +140,8 @@ namespace Plugin.NINA.AstroAppHTTPAPI.Equipment {
     public enum RotatorAction {
         NONE = 0,
         CONNECTED = 1,
-        DISCONNECTED = 2
+        DISCONNECTED = 2,
+        MOVED = 3
     }
 
     public class RotatorEventArgs : EventArgs {
@@ -152,7 +155,9 @@ namespace Plugin.NINA.AstroAppHTTPAPI.Equipment {
     public enum FlatDeviceAction {
         NONE = 0,
         CONNECTED = 1,
-        DISCONNECTED = 2
+        DISCONNECTED = 2,
+        LIGHT_TOGGLED = 3,
+        BRIGHTNESS_UPDATED = 4
     }
 
     public class FlatDeviceEventArgs : EventArgs {
@@ -180,7 +185,8 @@ namespace Plugin.NINA.AstroAppHTTPAPI.Equipment {
     public enum SafetyMonitorAction {
         NONE = 0,
         CONNECTED = 1,
-        DISCONNECTED = 2
+        DISCONNECTED = 2,
+        IS_SAFE_CHANGED = 3
     }
 
     public class SafetyMonitorEventArgs : EventArgs {
@@ -332,6 +338,14 @@ namespace Plugin.NINA.AstroAppHTTPAPI.Equipment {
                 GuiderUpdated?.Invoke(this, new GuiderEventArgs(GuiderAction.DISCONNECTED));
                 return Task.CompletedTask;
             };
+            this.guider.GuidingStarted += (sender, e) => {
+                GuiderUpdated?.Invoke(this, new GuiderEventArgs(GuiderAction.GUIDING_STARTED));
+                return Task.CompletedTask;
+            };
+            this.guider.GuidingStopped += (sender, e) => {
+                GuiderUpdated?.Invoke(this, new GuiderEventArgs(GuiderAction.GUIDING_STOPPED));
+                return Task.CompletedTask;
+            };
             this.switches = switches;
             this.switches.Connected += (sender, e) => {
                 SwitchUpdated?.Invoke(this, new SwitchEventArgs(SwitchAction.CONNECTED));
@@ -346,6 +360,10 @@ namespace Plugin.NINA.AstroAppHTTPAPI.Equipment {
                 RotatorUpdated?.Invoke(this, new RotatorEventArgs(RotatorAction.CONNECTED));
                 return Task.CompletedTask;
             };
+            this.rotator.Moved += (sender, e) => {
+                RotatorUpdated?.Invoke(this, new RotatorEventArgs(RotatorAction.MOVED));
+                return Task.CompletedTask;
+            };
             this.rotator.Disconnected += (sender, e) => {
                 RotatorUpdated?.Invoke(this, new RotatorEventArgs(RotatorAction.DISCONNECTED));
                 return Task.CompletedTask;
@@ -357,6 +375,14 @@ namespace Plugin.NINA.AstroAppHTTPAPI.Equipment {
             };
             this.flatDevice.Disconnected += (sender, e) => {
                 FlatDeviceUpdated?.Invoke(this, new FlatDeviceEventArgs(FlatDeviceAction.DISCONNECTED));
+                return Task.CompletedTask;
+            };
+            this.flatDevice.LightToggled += (sender, e) => {
+                FlatDeviceUpdated?.Invoke(this, new FlatDeviceEventArgs(FlatDeviceAction.LIGHT_TOGGLED));
+                return Task.CompletedTask;
+            };
+            this.flatDevice.BrightnessChanged += (sender, e) => {
+                FlatDeviceUpdated?.Invoke(this, new FlatDeviceEventArgs(FlatDeviceAction.BRIGHTNESS_UPDATED));
                 return Task.CompletedTask;
             };
             this.weather = weather;
@@ -376,6 +402,9 @@ namespace Plugin.NINA.AstroAppHTTPAPI.Equipment {
             this.safetyMonitor.Disconnected += (sender, e) => {
                 SafetyMonitorUpdated?.Invoke(this, new SafetyMonitorEventArgs(SafetyMonitorAction.DISCONNECTED));
                 return Task.CompletedTask;
+            };
+            this.safetyMonitor.IsSafeChanged += (sender, e) => {
+                SafetyMonitorUpdated?.Invoke(this, new SafetyMonitorEventArgs(SafetyMonitorAction.IS_SAFE_CHANGED));
             };
         }
 
