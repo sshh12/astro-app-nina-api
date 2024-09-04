@@ -1,2 +1,2 @@
-﻿# Astro App API
+﻿# Astro HTTP API
 

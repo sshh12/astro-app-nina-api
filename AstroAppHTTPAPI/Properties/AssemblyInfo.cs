@@ -11,7 +11,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyFileVersion("1.0.0.1")]
 
 // [MANDATORY] The name of your plugin
-[assembly: AssemblyTitle("Astro App HTTP API")]
+[assembly: AssemblyTitle("Astro HTTP API")]
 // [MANDATORY] A short description of your plugin
 [assembly: AssemblyDescription("A general HTTP API for NINA designed for use with astroapp.io")]
 
@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 // Your name
 [assembly: AssemblyCompany("Shrivu Shankar")]
 // The product name that this plugin is part of
-[assembly: AssemblyProduct("Astro App HTTP API")]
+[assembly: AssemblyProduct("Astro HTTP API")]
 [assembly: AssemblyCopyright("Copyright © 2024 Shrivu Shankar")]
 
 // The minimum Version of N.I.N.A. that this plugin is compatible with
@@ -39,7 +39,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyMetadata("Homepage", "https://github.com/sshh12/astro-app-nina-api")]
 
 //[Optional] Common tags that quickly describe your plugin
-[assembly: AssemblyMetadata("Tags", "HTTP, API, Websockets")]
+[assembly: AssemblyMetadata("Tags", "HTTP, REST, API, Websockets")]
 
 //[Optional] A link that will show a log of all changes in between your plugin's versions
 [assembly: AssemblyMetadata("ChangelogURL", "https://github.com/sshh12/astro-app-nina-api/commits/main/")]
