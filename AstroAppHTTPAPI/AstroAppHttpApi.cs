@@ -12,7 +12,6 @@ using Plugin.NINA.AstroAppHTTPAPI.Web;
 using System;
 using System.ComponentModel;
 using System.ComponentModel.Composition;
-using System.Linq;
 using System.Threading.Tasks;
 using Settings = Plugin.NINA.AstroAppHTTPAPI.Properties.Settings;
 
