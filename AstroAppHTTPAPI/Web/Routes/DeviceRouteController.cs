@@ -2,6 +2,7 @@
 using EmbedIO.WebApi;
 using Newtonsoft.Json;
 using Plugin.NINA.AstroAppHTTPAPI.Equipment;
+using System.Threading.Tasks;
 
 namespace Plugin.NINA.AstroAppHTTPAPI.Web {
 
@@ -17,7 +18,7 @@ namespace Plugin.NINA.AstroAppHTTPAPI.Web {
             };
         }
 
-        public async void RespondWithJSON(object? value) {
+        public async Task RespondWithJSON(object? value) {
             HttpContext.Response.StatusCode = 200;
             HttpContext.Response.ContentType = "application/json";
             using (var writer = HttpContext.OpenResponseText()) {

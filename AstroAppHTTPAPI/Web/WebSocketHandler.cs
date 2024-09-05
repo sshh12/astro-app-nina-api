@@ -7,6 +7,20 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Plugin.NINA.AstroAppHTTPAPI.Web {
+
+    public class WebSocketConnectedResponse {
+        public string Type = "WebSocketConnected";
+    }
+
+    public class WebSocketAuthenticatedResponse {
+        public string Type = "WebSocketAuthenticated";
+        public bool Success { get; set; }
+    }
+
+    public class WebSocketAuthRequest {
+        public string ApiKey { get; set; }
+    }
+
     public class WebSocketHandler : WebSocketModule {
 
         private EquipmentManager equipmentManager;

@@ -3,8 +3,44 @@ using EmbedIO.Routing;
 using EmbedIO.WebApi;
 using Plugin.NINA.AstroAppHTTPAPI.Equipment;
 using System.Threading.Tasks;
+using NINA.Equipment.Equipment.MyFocuser;
+using System;
 
 namespace Plugin.NINA.AstroAppHTTPAPI.Web {
+
+    public class FocuserStatusResponse {
+        public string Type = "FocuserStatus";
+        public string Name { get; set; }
+        public string Description { get; set; }
+        public string DeviceId { get; set; }
+        public bool Connected { get; set; }
+        public int Position { get; set; }
+        public bool TempComp { get; set; }
+        public bool TempCompAvailable { get; set; }
+        public double? Temperature { get; set; }
+        public double? StepSize { get; set; }
+        public string Action { get; set; }
+
+        public static FocuserStatusResponse FromFocuserInfo(FocuserInfo info, FocuserAction action) {
+            return new FocuserStatusResponse {
+                Name = info.Name,
+                Description = info.Description,
+                DeviceId = info.DeviceId,
+                Connected = info.Connected,
+                Position = info.Position,
+                TempComp = info.TempComp,
+                TempCompAvailable = info.TempCompAvailable,
+                Temperature = Double.IsNaN(info.Temperature) ? null : info.Temperature,
+                StepSize = Double.IsNaN(info.StepSize) ? null : info.StepSize,
+                Action = action.ToString(),
+            };
+        }
+    }
+
+    public class FocuserPositionRequest {
+        public int Position { get; set; }
+    }
+
     public class FocuserRouteController : DeviceRouteController {
 
         public FocuserRouteController(IHttpContext context, EquipmentManager equipmentManager) : base(context, equipmentManager) { }
