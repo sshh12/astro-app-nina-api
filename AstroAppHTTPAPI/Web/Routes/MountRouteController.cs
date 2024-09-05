@@ -72,10 +72,10 @@ namespace Plugin.NINA.AstroAppHTTPAPI.Web {
         public MountRouteController(IHttpContext context, EquipmentManager equipmentManager) : base(context, equipmentManager) { }
 
         [Route(HttpVerbs.Get, "/")]
-        public void MountStatus() {
+        public async Task MountStatus() {
             var info = equipmentManager.MountInfo();
             var response = MountStatusResponse.FromMountInfo(info, MountAction.NONE);
-            RespondWithJSON(response);
+            await RespondWithJSON(response);
         }
 
         [Route(HttpVerbs.Post, "/connect")]
@@ -83,7 +83,7 @@ namespace Plugin.NINA.AstroAppHTTPAPI.Web {
             await equipmentManager.MountConnect();
             var info = equipmentManager.MountInfo();
             var response = MountStatusResponse.FromMountInfo(info, MountAction.CONNECTED);
-            RespondWithJSON(response);
+            await RespondWithJSON(response);
         }
 
         [Route(HttpVerbs.Post, "/disconnect")]
@@ -91,7 +91,7 @@ namespace Plugin.NINA.AstroAppHTTPAPI.Web {
             await equipmentManager.MountDisconnect();
             var info = equipmentManager.MountInfo();
             var response = MountStatusResponse.FromMountInfo(info, MountAction.DISCONNECTED);
-            RespondWithJSON(response);
+            await RespondWithJSON(response);
         }
 
         [Route(HttpVerbs.Post, "/park")]
@@ -99,7 +99,7 @@ namespace Plugin.NINA.AstroAppHTTPAPI.Web {
             await equipmentManager.MountPark();
             var info = equipmentManager.MountInfo();
             var response = MountStatusResponse.FromMountInfo(info, MountAction.PARKED);
-            RespondWithJSON(response);
+            await RespondWithJSON(response);
         }
 
         [Route(HttpVerbs.Post, "/unpark")]
@@ -107,7 +107,7 @@ namespace Plugin.NINA.AstroAppHTTPAPI.Web {
             await equipmentManager.MountUnpark();
             var info = equipmentManager.MountInfo();
             var response = MountStatusResponse.FromMountInfo(info, MountAction.UNPARKED);
-            RespondWithJSON(response);
+            await RespondWithJSON(response);
         }
     }
 }
