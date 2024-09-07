@@ -34,14 +34,14 @@ jobs:
       # This will build your solution. If the solution name differs from your plugin name, please adjust it here
       - name: Build .NET Assemblies
         run: |
-          dotnet restore
+          dotnet restore AstroAppHTTPAPI
           dotnet build AstroAppHTTPAPI/${{ env.PLUGIN_NAME }}.sln -c Release -p:PostBuildEvent= -p:Version=${{ github.ref_name }}
 
       # Add all necessary files that the plugin needs to the packages folder - basically all items that are normally in your post build event on your local builds
       - name: Prepare package
         run: |
-          Copy-Item "AstroAppHTTPAPI/bin/Release/net8.0-windows8.0/${{ env.PLUGIN_DLL_NAME }}.dll" "packages/${{ env.PLUGIN_NAME }}/${{ env.PLUGIN_DLL_NAME }}.dll" -Force
-          Copy-Item "AstroAppHTTPAPI/bin/Release/net8.0-windows8.0/${{ env.PLUGIN_DLL_NAME }}.pdb" "packages/${{ env.PLUGIN_NAME }}/${{ env.PLUGIN_DLL_NAME }}.pdb" -Force
+          Copy-Item "AstroAppHTTPAPI/bin/Release/net8.0-windows/${{ env.PLUGIN_DLL_NAME }}.dll" "packages/${{ env.PLUGIN_NAME }}/${{ env.PLUGIN_DLL_NAME }}.dll" -Force
+          Copy-Item "AstroAppHTTPAPI/bin/Release/net8.0-windows/${{ env.PLUGIN_DLL_NAME }}.pdb" "packages/${{ env.PLUGIN_NAME }}/${{ env.PLUGIN_DLL_NAME }}.pdb" -Force
       
       - name: Create Plugin archives and manifests
         run: |
