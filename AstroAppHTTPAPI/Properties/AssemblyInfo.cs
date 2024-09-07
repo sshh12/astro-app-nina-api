@@ -13,12 +13,12 @@ using System.Runtime.InteropServices;
 // [MANDATORY] The name of your plugin
 [assembly: AssemblyTitle("Astro HTTP API")]
 // [MANDATORY] A short description of your plugin
-[assembly: AssemblyDescription("A general HTTP API for NINA designed for use with astroapp.io")]
+[assembly: AssemblyDescription("A general purpose HTTP API for NINA designed for use with astroapp.io")]
 
 // The following attributes are not required for the plugin per se, but are required by the official manifest meta data
 
 // Your name
-[assembly: AssemblyCompany("Shrivu Shankar")]
+[assembly: AssemblyCompany("Shrivu Shankar (sshh12)")]
 // The product name that this plugin is part of
 [assembly: AssemblyProduct("Astro HTTP API")]
 [assembly: AssemblyCopyright("Copyright © 2024 Shrivu Shankar")]
@@ -51,7 +51,31 @@ using System.Runtime.InteropServices;
 //[Optional] An additional url to an example example screenshot of your plugin in action
 [assembly: AssemblyMetadata("AltScreenshotURL", "")]
 //[Optional] An in-depth description of your plugin
-[assembly: AssemblyMetadata("LongDescription", @"")]
+[assembly: AssemblyMetadata("LongDescription", @"This plugin provides a general purpose HTTP (and websocket) server you can use to control N.I.N.A. remotely.
+
+* NOTE: This plugin is experimental and may not yet support all N.I.N.A features, in some cases it may unexpectedly crash N.I.N.A. Use at your own risk.
+
+# Features #
+
+* Control all standard device types (mount, focuser, camera, filter wheel, rotator, dome)
+* Subscribe to live events from N.I.N.A. via websockets
+* Use over the internet with tools like ngrok or cloudflare tunnels
+* Native support for astroapp.io
+
+# Quick Start #
+
+For using an existing UI, visit [astroapp.io](https://astroapp.io/image/nina).
+
+For using the API directly, see the [quick start guide](https://github.com/sshh12/astro-app-nina-api).
+
+See API docs here: [API Docs](https://github.com/sshh12/astro-app-nina-api/blob/main/API.md).
+
+# Getting Help #
+
+If you have questions, submit an issue on [GitHub](https://github.com/sshh12/astro-app-nina-api/issues) or this [form](https://forms.gle/hiaKh3HRfVBYZxiu6).
+* Astro HTTP API is provided 'as is' under the terms of the [Mozilla Public License 2.0](https://github.com/sshh12/astro-app-nina-api/blob/main/LICENSE)
+* Source code for this plugin is available at this plugin's [repository](https://github.com/sshh12/astro-app-nina-api)
+")]
 
 // Setting ComVisible to false makes the types in this assembly not visible
 // to COM components.  If you need to access a type in this assembly from
