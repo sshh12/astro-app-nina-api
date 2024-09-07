@@ -15,7 +15,7 @@ permissions:
 
 env:
   # Adjust this to your plugin title
-  PLUGIN_NAME: "AstroHTTPAPI"
+  PLUGIN_NAME: "AstroAppHTTPAPI"
   PLUGIN_DLL_NAME: "Plugin.NINA.AstroAppHTTPAPI"
 
 jobs:
@@ -37,20 +37,11 @@ jobs:
           dotnet restore
           dotnet build AstroAppHTTPAPI/${{ env.PLUGIN_NAME }}.sln -c Release -p:PostBuildEvent= -p:Version=${{ github.ref_name }}
 
-      # If you have mkdocs documentation you want to include, you can uncomment and build it like this
-      # - name: Build Documentation
-      #   run: |
-      #     python -m pip install --upgrade pip
-      #     pip install mkdocs
-      #     pip install mkdocs-material
-      #     mkdocs build -f ${{ env.PLUGIN_NAME }}\docs\mkdocs.yml
-
-
       # Add all necessary files that the plugin needs to the packages folder - basically all items that are normally in your post build event on your local builds
       - name: Prepare package
         run: |
-          Copy-Item "bin/Release/net8.0-windows8.0/${{ env.PLUGIN_DLL_NAME }}.dll" "packages/${{ env.PLUGIN_NAME }}/${{ env.PLUGIN_DLL_NAME }}.dll" -Force
-          Copy-Item "bin/Release/net8.0-windows8.0/${{ env.PLUGIN_DLL_NAME }}.pdb" "packages/${{ env.PLUGIN_NAME }}/${{ env.PLUGIN_DLL_NAME }}.pdb" -Force
+          Copy-Item "AstroAppHTTPAPI/bin/Release/net8.0-windows8.0/${{ env.PLUGIN_DLL_NAME }}.dll" "packages/${{ env.PLUGIN_NAME }}/${{ env.PLUGIN_DLL_NAME }}.dll" -Force
+          Copy-Item "AstroAppHTTPAPI/bin/Release/net8.0-windows8.0/${{ env.PLUGIN_DLL_NAME }}.pdb" "packages/${{ env.PLUGIN_NAME }}/${{ env.PLUGIN_DLL_NAME }}.pdb" -Force
       
       - name: Create Plugin archives and manifests
         run: |
