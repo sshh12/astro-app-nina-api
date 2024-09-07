@@ -1,9 +1,12 @@
 ﻿using EmbedIO;
 using EmbedIO.Routing;
+using EmbedIO.WebApi;
 using Plugin.NINA.AstroAppHTTPAPI.Equipment;
 using NINA.Equipment.Equipment.MyTelescope;
 using System.Threading.Tasks;
 using System;
+using NINA.Equipment.Interfaces;
+using NINA.Astrometry;
 
 namespace Plugin.NINA.AstroAppHTTPAPI.Web {
 
@@ -67,6 +70,19 @@ namespace Plugin.NINA.AstroAppHTTPAPI.Web {
 
     }
 
+    public class MountTrackingModeRequest {
+        public string TrackingMode { get; set; }
+
+        public TrackingMode ToTrackingMode() {
+            return (TrackingMode)Enum.Parse(typeof(TrackingMode), TrackingMode);
+        }
+    }
+
+    public class MountSlewRequest {
+        public double RightAscension { get; set; }
+        public double Declination { get; set; }
+    }
+
     public class MountRouteController : DeviceRouteController {
 
         public MountRouteController(IHttpContext context, EquipmentManager equipmentManager) : base(context, equipmentManager) { }
@@ -107,6 +123,22 @@ namespace Plugin.NINA.AstroAppHTTPAPI.Web {
             await equipmentManager.MountUnpark();
             var info = equipmentManager.MountInfo();
             var response = MountStatusResponse.FromMountInfo(info, MountAction.UNPARKED);
+            await RespondWithJSON(response);
+        }
+
+        [Route(HttpVerbs.Patch, "/trackingmode")]
+        public async Task MountSetTrackingMode([JsonData] MountTrackingModeRequest request) {
+            await equipmentManager.MountSetTrackingMode(request.ToTrackingMode());
+            var info = equipmentManager.MountInfo();
+            var response = MountStatusResponse.FromMountInfo(info, MountAction.TRACKING_MODE_UPDATED);
+            await RespondWithJSON(response);
+        }
+
+        [Route(HttpVerbs.Post, "/slew")]
+        public async Task MountSlew([JsonData] MountSlewRequest request) {
+            await equipmentManager.MountSlew(request.RightAscension, request.Declination, Epoch.JNOW, Coordinates.RAType.Hours);
+            var info = equipmentManager.MountInfo();
+            var response = MountStatusResponse.FromMountInfo(info, MountAction.NONE);
             await RespondWithJSON(response);
         }
     }

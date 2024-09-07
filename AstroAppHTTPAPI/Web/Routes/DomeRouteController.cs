@@ -98,25 +98,25 @@ namespace Plugin.NINA.AstroAppHTTPAPI.Web {
         [Route(HttpVerbs.Post, "/park")]
         public async Task DomePark() {
             await equipmentManager.DomePark();
-            respondWithInfo(DomeAction.PARKED);
+            await respondWithInfo(DomeAction.PARKED);
         }
 
         [Route(HttpVerbs.Post, "/home")]
         public async Task DomeHome() {
             await equipmentManager.DomeFindHome();
-            respondWithInfo(DomeAction.HOMED);
+            await respondWithInfo(DomeAction.HOMED);
         }
 
         [Route(HttpVerbs.Post, "/sync")]
         public async Task DomeSync() {
             await equipmentManager.DomeSyncToMount();
-            respondWithInfo(DomeAction.SYNCED);
+            await respondWithInfo(DomeAction.SYNCED);
         }
 
         [Route(HttpVerbs.Patch, "/following")]
         public async Task DomeSetFollowing([JsonData] DomeFollowingRequest request) {
             await equipmentManager.DomeSetFollowing(request.Enabled);
-            respondWithInfo(DomeAction.FOLLOWING_UPDATED);
+            await respondWithInfo(DomeAction.FOLLOWING_UPDATED);
         }
     }
 }

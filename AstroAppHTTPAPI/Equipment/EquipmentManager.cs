@@ -15,7 +15,7 @@ using NINA.Equipment.Equipment.MySafetyMonitor;
 using NINA.Equipment.Interfaces.Mediator;
 using NINA.WPF.Base.Interfaces.Mediator;
 using System;
-using System.Collections.Generic;
+using NINA.Equipment.Interfaces;
 using System.Threading;
 using System.Threading.Tasks;
 using NINA.Astrometry;
@@ -67,6 +67,7 @@ namespace Plugin.NINA.AstroAppHTTPAPI.Equipment {
         HOMED = 4,
         SLEWED = 5,
         UNPARKED = 6,
+        TRACKING_MODE_UPDATED = 7,
     }
 
     public class MountEventArgs : EventArgs {
@@ -686,7 +687,7 @@ namespace Plugin.NINA.AstroAppHTTPAPI.Equipment {
             }
         }
 
-        public async Task ScopeSlew(double ra, double dec, Epoch epoch, Coordinates.RAType ratype) {
+        public async Task MountSlew(double ra, double dec, Epoch epoch, Coordinates.RAType ratype) {
             if (mount.GetInfo().Connected) {
                 var coords = new Coordinates(ra, dec, epoch, ratype);
                 mountTokenSource?.Cancel();
@@ -711,6 +712,13 @@ namespace Plugin.NINA.AstroAppHTTPAPI.Equipment {
                 focuserTokenSource = new CancellationTokenSource();
                 await focuser.MoveFocuser(pos, focuserTokenSource.Token);
             }
+        }
+
+        public async Task MountSetTrackingMode(TrackingMode mode) {
+            if (mount.GetInfo().Connected) {
+                mount.SetTrackingMode(mode);
+            }
+            await Task.CompletedTask;
         }
     }
 
