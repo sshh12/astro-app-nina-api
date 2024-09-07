@@ -1,6 +1,6 @@
 ﻿# Astro HTTP API
 
-> Astro HTTP API is a general purpose HTTP API for [N.I.N.A](https://nighttime-imaging.eu/) designed for use with [astroapp.io](https://astroapp.io/)
+> Astro HTTP API is a general purpose HTTP API for [N.I.N.A](https://nighttime-imaging.eu/) designed for use with [AstroApp.io](https://astroapp.io/)
 
 ## Local Network Setup
 
