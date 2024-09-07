@@ -3,7 +3,6 @@ using NINA.Core.Utility.Notification;
 using NINA.Equipment.Interfaces.Mediator;
 using NINA.Plugin;
 using NINA.Plugin.Interfaces;
-using NINA.Profile;
 using NINA.Profile.Interfaces;
 using NINA.WPF.Base.Interfaces.Mediator;
 using NINA.WPF.Base.Interfaces.ViewModel;
@@ -20,8 +19,6 @@ namespace Plugin.NINA.AstroAppHTTPAPI {
     [Export(typeof(IPluginManifest))]
     public class AstroAppHttpApi : PluginBase, INotifyPropertyChanged {
         public event PropertyChangedEventHandler PropertyChanged;
-        private readonly IPluginOptionsAccessor pluginSettings;
-        private readonly IProfileService profileService;
         private static WebServerManager serverManager;
         private EquipmentManager equipmentManager;
 
@@ -52,8 +49,6 @@ namespace Plugin.NINA.AstroAppHTTPAPI {
                 Settings.Default.UpdateSettings = false;
                 CoreUtil.SaveSettings(Settings.Default);
             }
-            pluginSettings = new PluginOptionsAccessor(profileService, Guid.Parse(Identifier));
-            this.profileService = profileService;
 
             if (string.IsNullOrEmpty(ApiKey)) {
                 ApiKey = GenerateRandomKey();
