@@ -43,7 +43,7 @@ jobs:
           Copy-Item "AstroAppHTTPAPI/bin/Release/net8.0-windows/${{ env.PLUGIN_DLL_NAME }}.dll" "packages/${{ env.PLUGIN_NAME }}/${{ env.PLUGIN_DLL_NAME }}.dll" -Force
           Copy-Item "AstroAppHTTPAPI/bin/Release/net8.0-windows/${{ env.PLUGIN_DLL_NAME }}.pdb" "packages/${{ env.PLUGIN_NAME }}/${{ env.PLUGIN_DLL_NAME }}.pdb" -Force
           curl https://raw.githubusercontent.com/sshh12/astro-app-nina-api/main/bins/EmbedIO.dll -o "packages/${{ env.PLUGIN_NAME }}/EmbedIO.dll"
-          curl https://raw.githubusercontent.com/sshh12/astro-app-nina-api/main/binsSwan.Lite.dll -o "packages/${{ env.PLUGIN_NAME }}/Swan.Lite.dll"
+          curl https://raw.githubusercontent.com/sshh12/astro-app-nina-api/main/bins/Swan.Lite.dll -o "packages/${{ env.PLUGIN_NAME }}/Swan.Lite.dll"
       
       - name: Create Plugin archives and manifests
         run: |
