@@ -113,7 +113,7 @@ def generate_events_markdown(title, prefix, types):
     status_response_types = {k: v for k, v in types.items() if k.endswith("StatusResponse")}
     for name, types in status_response_types.items():
         markdown += f"<details>\n <summary><code>Event</code> <code><b>{name}</b></code></summary>\n\n"
-        markdown += "##### Parameters\n\n"
+        markdown += "##### Data\n\n"
         markdown += "> | name      |  type     | data type               | description                                                           |\n"
         markdown += "> |-----------|-----------|-------------------------|-----------------------------------------------------------------------|\n"
         for prop_name, prop_type in types.items():

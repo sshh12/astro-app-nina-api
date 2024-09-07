@@ -765,7 +765,7 @@
 <details>
  <summary><code>Event</code> <code><b>CameraStatusResponse</b></code></summary>
 
-##### Parameters
+##### Data
 
 > | name      |  type     | data type               | description                                                           |
 > |-----------|-----------|-------------------------|-----------------------------------------------------------------------|
@@ -801,7 +801,7 @@
 <details>
  <summary><code>Event</code> <code><b>DomeStatusResponse</b></code></summary>
 
-##### Parameters
+##### Data
 
 > | name      |  type     | data type               | description                                                           |
 > |-----------|-----------|-------------------------|-----------------------------------------------------------------------|
@@ -826,7 +826,7 @@
 <details>
  <summary><code>Event</code> <code><b>MountStatusResponse</b></code></summary>
 
-##### Parameters
+##### Data
 
 > | name      |  type     | data type               | description                                                           |
 > |-----------|-----------|-------------------------|-----------------------------------------------------------------------|
@@ -863,7 +863,7 @@
 <details>
  <summary><code>Event</code> <code><b>RotatorStatusResponse</b></code></summary>
 
-##### Parameters
+##### Data
 
 > | name      |  type     | data type               | description                                                           |
 > |-----------|-----------|-------------------------|-----------------------------------------------------------------------|
@@ -886,7 +886,7 @@
 <details>
  <summary><code>Event</code> <code><b>SwitchStatusResponse</b></code></summary>
 
-##### Parameters
+##### Data
 
 > | name      |  type     | data type               | description                                                           |
 > |-----------|-----------|-------------------------|-----------------------------------------------------------------------|
@@ -904,7 +904,7 @@
 <details>
  <summary><code>Event</code> <code><b>FocuserStatusResponse</b></code></summary>
 
-##### Parameters
+##### Data
 
 > | name      |  type     | data type               | description                                                           |
 > |-----------|-----------|-------------------------|-----------------------------------------------------------------------|
@@ -927,7 +927,7 @@
 <details>
  <summary><code>Event</code> <code><b>FilterWheelStatusResponse</b></code></summary>
 
-##### Parameters
+##### Data
 
 > | name      |  type     | data type               | description                                                           |
 > |-----------|-----------|-------------------------|-----------------------------------------------------------------------|
@@ -946,7 +946,7 @@
 <details>
  <summary><code>Event</code> <code><b>FlatDeviceStatusResponse</b></code></summary>
 
-##### Parameters
+##### Data
 
 > | name      |  type     | data type               | description                                                           |
 > |-----------|-----------|-------------------------|-----------------------------------------------------------------------|
@@ -969,7 +969,7 @@
 <details>
  <summary><code>Event</code> <code><b>SafetyMonitorStatusResponse</b></code></summary>
 
-##### Parameters
+##### Data
 
 > | name      |  type     | data type               | description                                                           |
 > |-----------|-----------|-------------------------|-----------------------------------------------------------------------|
@@ -988,7 +988,7 @@
 <details>
  <summary><code>Event</code> <code><b>WeatherStatusResponse</b></code></summary>
 
-##### Parameters
+##### Data
 
 > | name      |  type     | data type               | description                                                           |
 > |-----------|-----------|-------------------------|-----------------------------------------------------------------------|
