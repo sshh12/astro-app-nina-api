@@ -19,6 +19,7 @@ using NINA.Equipment.Interfaces;
 using System.Threading;
 using System.Threading.Tasks;
 using NINA.Astrometry;
+using NINA.Equipment.Model;
 
 namespace Plugin.NINA.AstroAppHTTPAPI.Equipment {
 
@@ -201,6 +202,8 @@ namespace Plugin.NINA.AstroAppHTTPAPI.Equipment {
     public class EquipmentManager {
         private IApplicationStatusMediator statusMediator;
         private ICameraMediator camera;
+        private IImagingMediator imaging;
+        private IImageSaveMediator imageSave;
         private IDomeMediator dome;
         private IFilterWheelMediator filterWheel;
         private IFocuserMediator focuser;
@@ -215,6 +218,7 @@ namespace Plugin.NINA.AstroAppHTTPAPI.Equipment {
         private static CancellationTokenSource mountTokenSource;
         private static CancellationTokenSource filterWheelTokenSource;
         private static CancellationTokenSource focuserTokenSource;
+        private static CancellationTokenSource cameraTokenSource;
         public event EventHandler<CameraEventArgs> CameraUpdated;
         public event EventHandler<DomeEventArgs> DomeUpdated;
         public event EventHandler<MountEventArgs> MountUpdated;
@@ -230,6 +234,8 @@ namespace Plugin.NINA.AstroAppHTTPAPI.Equipment {
         public EquipmentManager(
                 IApplicationStatusMediator statusMediator,
                 ICameraMediator camera,
+                IImagingMediator imaging,
+                IImageSaveMediator imageSave,
                 IDomeMediator dome,
                 IFilterWheelMediator filterWheel,
                 IFocuserMediator focuser,
@@ -251,6 +257,8 @@ namespace Plugin.NINA.AstroAppHTTPAPI.Equipment {
                 CameraUpdated?.Invoke(this, new CameraEventArgs(CameraAction.DISCONNECTED));
                 return Task.CompletedTask;
             };
+            this.imaging = imaging;
+            this.imageSave = imageSave;
             this.dome = dome;
             this.dome.Connected += (sender, e) => {
                 DomeUpdated?.Invoke(this, new DomeEventArgs(DomeAction.CONNECTED));
@@ -667,6 +675,14 @@ namespace Plugin.NINA.AstroAppHTTPAPI.Equipment {
             return dome.IsFollowingScope;
         }
 
+        public double CameraTargetTemp() {
+            return camera.TargetTemp;
+        }
+
+        public bool CameraAtTargetTemp() {
+            return camera.AtTargetTemp;
+        }
+
         public async Task DomeSetFollowing(bool following) {
             if (dome.GetInfo().Connected) {
                 domeTokenSource?.Cancel();
@@ -720,6 +736,23 @@ namespace Plugin.NINA.AstroAppHTTPAPI.Equipment {
             }
             await Task.CompletedTask;
         }
+
+        public async Task CameraCapture(double exposureTime) {
+            if (camera.GetInfo().Connected) {
+                var progress = new Progress<ApplicationStatus>(status => {
+                    Logger.Info($"CameraCapture: {status.Progress}");
+                });
+                cameraTokenSource?.Cancel();
+                cameraTokenSource = new CancellationTokenSource();
+                var capSeq = new CaptureSequence();
+                capSeq.ExposureTime = exposureTime;
+                var exposureData = await imaging.CaptureImage(capSeq, cameraTokenSource.Token, progress);
+                var imageData = await exposureData.ToImageData(progress, cameraTokenSource.Token);
+                var prepareTask = imaging.PrepareImage(imageData, new PrepareImageParameters(), cameraTokenSource.Token);
+                await imageSave.Enqueue(imageData, prepareTask, progress, cameraTokenSource.Token);
+            }
+        }
+
     }
 
 }

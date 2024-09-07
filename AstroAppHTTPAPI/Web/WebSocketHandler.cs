@@ -50,7 +50,7 @@ namespace Plugin.NINA.AstroAppHTTPAPI.Web {
 
         private async Task PostCameraStatus(CameraEventArgs e) {
             var info = equipmentManager.CameraInfo();
-            var response = CameraStatusResponse.FromCameraInfo(info, e.Action);
+            var response = CameraStatusResponse.FromCameraInfo(info, equipmentManager.CameraAtTargetTemp(), equipmentManager.CameraTargetTemp(), e.Action);
             await BroadcastAuthedClientsAsync(JsonConvert.SerializeObject(response, jsonSettings));
         }
 

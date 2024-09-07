@@ -34,6 +34,8 @@ namespace Plugin.NINA.AstroAppHTTPAPI {
                 IOptionsVM options,
                 IApplicationStatusMediator statusMediator,
                 ICameraMediator camera,
+                IImagingMediator imaging,
+                IImageSaveMediator imageSave,
                 IDomeMediator dome,
                 IFilterWheelMediator filterWheel,
                 IFocuserMediator focuser,
@@ -60,6 +62,8 @@ namespace Plugin.NINA.AstroAppHTTPAPI {
             equipmentManager = new EquipmentManager(
                 statusMediator,
                 camera,
+                imaging,
+                imageSave,
                 dome,
                 filterWheel,
                 focuser,
