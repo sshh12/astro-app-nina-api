@@ -9,7 +9,7 @@
 3. Find your local IP address by running `ipconfig` in Command Prompt (typically `192.168.x.x` or `10.x.x.x`)
 4. Open your browser and navigate to `http://<local-ip>:<port>` where `<local-ip>` is your local IP address and `<port>` is the port you set in the plugin settings (default is `8181`). It should prompt for a login and you'll see the user/password in the plugin settings.
 
-By default, you'll only be able to access the API from your local network (e.g. same WiFi network).
+By default, you'll only be able to access the API from your local network (e.g. same WiFi network) and will need to setup SSL if you want to use it with astroapp.io.
 
 <details>
 <summary>SSL Setup Instructions (Windows)</summary>
