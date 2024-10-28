@@ -8,6 +8,7 @@ using System;
 using System.Linq;
 using System.Threading;
 using System.Timers;
+using System.Net.NetworkInformation;
 
 namespace Plugin.NINA.AstroAppHTTPAPI.Web {
 
@@ -19,6 +20,7 @@ namespace Plugin.NINA.AstroAppHTTPAPI.Web {
         private EquipmentManager equipmentManager;
         private System.Timers.Timer statusTimer;
         private string apiKey;
+        public string ServerUrls { get; private set; } = "";
 
         public WebServerManager(int port, string apiKey, EquipmentManager equipmentManager) {
             this.port = port;
@@ -44,6 +46,29 @@ namespace Plugin.NINA.AstroAppHTTPAPI.Web {
                 .WithWebApi("/api/v1/flatdevice", m => m.WithController(() => new FlatDeviceRouteController(null, equipmentManager)))
                 .WithWebApi("/api/v1/safetymonitor", m => m.WithController(() => new SafetyMonitorController(null, equipmentManager)))
                 .WithWebApi("/api/v1/weather", m => m.WithController(() => new WeatherRouteController(null, equipmentManager)));
+
+            // After server creation, get the URLs
+            UpdateServerUrls();
+        }
+
+        private void UpdateServerUrls() {
+            try {
+                var addresses = NetworkInterface.GetAllNetworkInterfaces()
+                    .Where(x => x.OperationalStatus == OperationalStatus.Up)
+                    .SelectMany(x => x.GetIPProperties().UnicastAddresses)
+                    .Where(x => x.Address.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
+                    .Select(x => $"http://{x.Address}:{port}")
+                    .ToList();
+                    
+                ServerUrls = string.Join("\n", addresses);
+                
+                // Add localhost if not already included
+                if (!addresses.Any(x => x.Contains("127.0.0.1"))) {
+                    ServerUrls = $"http://127.0.0.1:{port}\n" + ServerUrls;
+                }
+            } catch (Exception ex) {
+                ServerUrls = $"Error getting server URLs: {ex.Message}";
+            }
         }
 
         public void Start() {
@@ -69,6 +94,8 @@ namespace Plugin.NINA.AstroAppHTTPAPI.Web {
                 server = null;
                 statusTimer.Stop();
                 statusTimer = null;
+                // Clear the ServerUrls when stopping
+                ServerUrls = "";
                 Notification.ShowSuccess("Web server stopped");
             } catch (Exception ex) {
                 Notification.ShowError($"Failed to stop web server {ex}");
@@ -80,6 +107,7 @@ namespace Plugin.NINA.AstroAppHTTPAPI.Web {
                 Stop();
             }
             Start();
+            UpdateServerUrls(); // Update URLs after restart
         }
 
         [STAThread]

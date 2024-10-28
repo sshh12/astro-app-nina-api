@@ -24,7 +24,6 @@ namespace Plugin.NINA.AstroAppHTTPAPI {
 
         public RelayCommand RestartServerCommand { get; set; }
 
-
         [ImportingConstructor]
         public AstroAppHttpApi(
                 IProfileService profileService,
@@ -80,6 +79,7 @@ namespace Plugin.NINA.AstroAppHTTPAPI {
                 if (WebServerEnabled) {
                     serverManager.Stop();
                     serverManager.Start();
+                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ServerUrls)));
                 } else {
                     Notification.ShowError("Start the server first!");
                 }
@@ -140,6 +140,14 @@ namespace Plugin.NINA.AstroAppHTTPAPI {
                 } else {
                     serverManager.Stop();
                 }
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ServerUrls)));
+            }
+        }
+
+        public string ServerUrls {
+            get => serverManager?.ServerUrls ?? "";
+            private set {
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ServerUrls)));
             }
         }
 

@@ -25,6 +25,14 @@
                         <TextBox MinWidth="50"
                                  Text="{Binding Port}"/>
                     </StackPanel>
+                    <StackPanel Orientation="Horizontal"
+                                Margin="0,0,0,5">
+                        <TextBlock Text="Server URLs"
+                                   Width="100"/>
+                        <TextBlock MinWidth="200"
+                                   Text="{Binding ServerUrls}"
+                                   TextWrapping="Wrap"/>
+                    </StackPanel>
                     <Button Content="Restart Server"
                             Command="{Binding RestartServerCommand}"
                             Width="100"
