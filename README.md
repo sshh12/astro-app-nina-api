@@ -12,7 +12,7 @@
 By default, you'll only be able to access the API from your local network (e.g. same WiFi network).
 
 <details>
-<summary>SSL Setup Instructions</summary>
+<summary>SSL Setup Instructions (Windows)</summary>
 
 To generate a self-signed SSL certificate using PowerShell:
 
@@ -29,7 +29,9 @@ Export-PfxCertificate -Cert $cert -FilePath $path -Password $pwd
 
 2. Update the plugin settings with:
    - SSL Certificate Path: Path to the generated .pfx file (e.g., `C:\Users\Shriv\Desktop\certificate.pfx`)
-   - SSL Certificate Password: The password you used in the PowerShell command
+   - SSL Certificate Password: The password you used in the PowerShell command (e.g., `YourPasswordHere`)
+
+3. If you want to use this with astroapp.io, in Chrome, enable `chrome://flags/#allow-insecure-localhost` and restart.
 
 Note: Self-signed certificates will show security warnings in browsers.
 
