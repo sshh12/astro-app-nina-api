@@ -9,6 +9,8 @@ using System.Linq;
 using System.Threading;
 using System.Timers;
 using System.Net.NetworkInformation;
+using System.Security.Cryptography.X509Certificates;
+using System.Configuration;
 
 namespace Plugin.NINA.AstroAppHTTPAPI.Web {
 
@@ -21,18 +23,42 @@ namespace Plugin.NINA.AstroAppHTTPAPI.Web {
         private System.Timers.Timer statusTimer;
         private string apiKey;
         public string ServerUrls { get; private set; } = "";
+        private bool useHttps;
+        private string certificatePath;
+        private string certificatePassword;
 
-        public WebServerManager(int port, string apiKey, EquipmentManager equipmentManager) {
+        public WebServerManager(int port, bool useHttps, string apiKey, EquipmentManager equipmentManager, 
+            string certificatePath, string certificatePassword) {
             this.port = port;
             this.equipmentManager = equipmentManager;
             this.apiKey = apiKey;
+            this.useHttps = useHttps;
+            this.certificatePath = certificatePath;
+            this.certificatePassword = certificatePassword;
         }
 
         private void CreateServer() {
             webSocketHandler = new WebSocketHandler("/events/v1", equipmentManager, apiKey);
-            server = new WebServer(o => o
-                .WithUrlPrefix($"http://*:{port}")
-                .WithMode(HttpListenerMode.EmbedIO))
+            
+            var urlPrefix = useHttps ? $"https://*:{port}" : $"http://*:{port}";
+            
+            var options = new WebServerOptions()
+                .WithUrlPrefix(urlPrefix)
+                .WithMode(HttpListenerMode.EmbedIO);
+
+            if (useHttps) {
+                try {
+                    // For HTTPS, we need to ensure the certificate is installed and bound to the port
+                    options.WithCertificate(GetCertificate());
+                } catch (Exception ex) {
+                    Notification.ShowError($"HTTPS configuration failed: {ex.Message}");
+                    // Fallback to HTTP
+                    urlPrefix = $"http://*:{port}";
+                    options.WithUrlPrefix(urlPrefix);
+                }
+            }
+
+            server = new WebServer(options)
                 .WithModule(new CorsModule("/", "*", "*", "*"))
                 .WithModule(webSocketHandler)
                 .WithModule(new BasicAuthenticationModule("/").WithAccount("user", apiKey))
@@ -46,25 +72,25 @@ namespace Plugin.NINA.AstroAppHTTPAPI.Web {
                 .WithWebApi("/api/v1/flatdevice", m => m.WithController(() => new FlatDeviceRouteController(null, equipmentManager)))
                 .WithWebApi("/api/v1/safetymonitor", m => m.WithController(() => new SafetyMonitorController(null, equipmentManager)))
                 .WithWebApi("/api/v1/weather", m => m.WithController(() => new WeatherRouteController(null, equipmentManager)));
-
-            // After server creation, get the URLs
+            
             UpdateServerUrls();
         }
 
         private void UpdateServerUrls() {
             try {
+                var protocol = useHttps ? "https" : "http";
                 var addresses = NetworkInterface.GetAllNetworkInterfaces()
                     .Where(x => x.OperationalStatus == OperationalStatus.Up)
                     .SelectMany(x => x.GetIPProperties().UnicastAddresses)
                     .Where(x => x.Address.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
-                    .Select(x => $"http://{x.Address}:{port}")
+                    .Select(x => $"{protocol}://{x.Address}:{port}")
                     .ToList();
                     
                 ServerUrls = string.Join("\n", addresses);
                 
                 // Add localhost if not already included
                 if (!addresses.Any(x => x.Contains("127.0.0.1"))) {
-                    ServerUrls = $"http://127.0.0.1:{port}\n" + ServerUrls;
+                    ServerUrls = $"{protocol}://127.0.0.1:{port}\n" + ServerUrls;
                 }
             } catch (Exception ex) {
                 ServerUrls = $"Error getting server URLs: {ex.Message}";
@@ -83,6 +109,7 @@ namespace Plugin.NINA.AstroAppHTTPAPI.Web {
             statusTimer = new System.Timers.Timer(10000);
             statusTimer.Elapsed += OnStatusTimerElapsed;
             statusTimer.Start();
+            UpdateServerUrls();
         }
 
         public void Stop() {
@@ -107,7 +134,6 @@ namespace Plugin.NINA.AstroAppHTTPAPI.Web {
                 Stop();
             }
             Start();
-            UpdateServerUrls(); // Update URLs after restart
         }
 
         [STAThread]
@@ -140,5 +166,21 @@ namespace Plugin.NINA.AstroAppHTTPAPI.Web {
 
         }
 
+        private X509Certificate2 GetCertificate() 
+        {
+            try {
+                if (string.IsNullOrEmpty(certificatePath)) {
+                    throw new Exception("No certificate path specified");
+                }
+
+                return new X509Certificate2(
+                    certificatePath, 
+                    certificatePassword ?? ""
+                );
+            }
+            catch (Exception ex) {
+                throw new Exception($"Failed to load certificate: {ex.Message}");
+            }
+        }
     }
 }

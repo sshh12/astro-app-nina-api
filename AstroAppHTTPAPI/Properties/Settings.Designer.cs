@@ -70,5 +70,41 @@ namespace Plugin.NINA.AstroAppHTTPAPI.Properties {
                 this["WebServerEnabled"] = value;
             }
         }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool EnableSSL {
+            get {
+                return ((bool)(this["EnableSSL"]));
+            }
+            set {
+                this["EnableSSL"] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string CertificatePath {
+            get {
+                return ((string)(this["CertificatePath"]));
+            }
+            set {
+                this["CertificatePath"] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string CertificatePassword {
+            get {
+                return ((string)(this["CertificatePassword"]));
+            }
+            set {
+                this["CertificatePassword"] = value;
+            }
+        }
     }
 }

@@ -41,7 +41,7 @@
             </GroupBox>
 
             <!-- SSL Settings -->
-            <!-- <GroupBox Header="SSL Settings" Margin="0,10,0,0">
+            <GroupBox Header="SSL Settings" Margin="0,10,0,0">
                 <StackPanel Orientation="Vertical">
                     <StackPanel Orientation="Horizontal" Margin="0,0,0,5">
                         <TextBlock Text="Enable SSL" Width="150" />
@@ -56,7 +56,7 @@
                         <TextBox MinWidth="200" Text="{Binding CertificatePassword}" />
                     </StackPanel>
                 </StackPanel>
-            </GroupBox> -->
+            </GroupBox>
 
             <!-- Security Settings -->
             <GroupBox Header="Security Settings"

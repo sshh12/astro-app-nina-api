@@ -69,7 +69,14 @@ namespace Plugin.NINA.AstroAppHTTPAPI {
                 safetyMonitor,
                 mount
             );
-            serverManager = new WebServerManager(Port, ApiKey, equipmentManager);
+            serverManager = new WebServerManager(
+                Port, 
+                EnableSSL, 
+                ApiKey, 
+                equipmentManager,
+                CertificatePath,
+                CertificatePassword
+            );
 
             if (WebServerEnabled) {
                 serverManager.Start();
@@ -148,6 +155,52 @@ namespace Plugin.NINA.AstroAppHTTPAPI {
             get => serverManager?.ServerUrls ?? "";
             private set {
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ServerUrls)));
+            }
+        }
+
+        public bool EnableSSL {
+            get => Settings.Default.EnableSSL;
+            set {
+                Settings.Default.EnableSSL = value;
+                CoreUtil.SaveSettings(Settings.Default);
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(EnableSSL)));
+                if (WebServerEnabled) {
+                    serverManager.Stop();
+                    serverManager = new WebServerManager(
+                        Port, 
+                        value, 
+                        ApiKey, 
+                        equipmentManager,
+                        CertificatePath,
+                        CertificatePassword
+                    );
+                    serverManager.Start();
+                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ServerUrls)));
+                }
+            }
+        }
+
+        public string CertificatePath {
+            get => Settings.Default.CertificatePath;
+            set {
+                Settings.Default.CertificatePath = value;
+                CoreUtil.SaveSettings(Settings.Default);
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(CertificatePath)));
+                if (WebServerEnabled && EnableSSL) {
+                    serverManager.Restart();
+                }
+            }
+        }
+
+        public string CertificatePassword {
+            get => Settings.Default.CertificatePassword;
+            set {
+                Settings.Default.CertificatePassword = value;
+                CoreUtil.SaveSettings(Settings.Default);
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(CertificatePassword)));
+                if (WebServerEnabled && EnableSSL) {
+                    serverManager.Restart();
+                }
             }
         }
 

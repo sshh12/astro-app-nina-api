@@ -11,6 +11,30 @@
 
 By default, you'll only be able to access the API from your local network (e.g. same WiFi network).
 
+<details>
+<summary>SSL Setup Instructions</summary>
+
+To generate a self-signed SSL certificate using PowerShell:
+
+1. Open PowerShell as Administrator and run:
+```powershell
+$cert = New-SelfSignedCertificate -DnsName "localhost" -CertStoreLocation "cert:\LocalMachine\My" -NotAfter (Get-Date).AddYears(10) -KeySpec KeyExchange
+
+$pwd = ConvertTo-SecureString -String "YourPasswordHere" -Force -AsPlainText # Change this to your desired password
+
+$path = "C:\Users\Shriv\Desktop\certificate.pfx" # Change this to the path you want to save the certificate to
+
+Export-PfxCertificate -Cert $cert -FilePath $path -Password $pwd
+```
+
+2. Update the plugin settings with:
+   - SSL Certificate Path: Path to the generated .pfx file (e.g., `C:\Users\Shriv\Desktop\certificate.pfx`)
+   - SSL Certificate Password: The password you used in the PowerShell command
+
+Note: Self-signed certificates will show security warnings in browsers.
+
+</details>
+
 ## Remote Network Setup
 
 There are a ton of options for exposing this server to the internet and allowing N.I.N.A. to be controlled from anywhere. See [awesome-tunneling](https://github.com/anderspitman/awesome-tunneling) for list of options.
