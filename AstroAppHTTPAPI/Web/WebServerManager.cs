@@ -11,6 +11,8 @@ using System.Timers;
 using System.Net.NetworkInformation;
 using System.Security.Cryptography.X509Certificates;
 using System.Configuration;
+using EmbedIO.Files;
+using System.Text;
 
 namespace Plugin.NINA.AstroAppHTTPAPI.Web {
 
@@ -61,7 +63,11 @@ namespace Plugin.NINA.AstroAppHTTPAPI.Web {
             server = new WebServer(options)
                 .WithModule(new CorsModule("/", "*", "*", "*"))
                 .WithModule(webSocketHandler)
-                .WithModule(new BasicAuthenticationModule("/").WithAccount("user", apiKey))
+                .WithModule(new BasicAuthenticationModule("/api").WithAccount("user", apiKey))
+                .WithAction("/", HttpVerbs.Get, ctx => {
+                    ctx.Response.ContentType = "text/html";
+                    return ctx.SendStringAsync(StaticContent.GetIndexHtml(), "text/html", Encoding.UTF8);
+                })
                 .WithWebApi("/api/v1/camera", m => m.WithController(() => new CameraRouteController(null, equipmentManager)))
                 .WithWebApi("/api/v1/dome", m => m.WithController(() => new DomeRouteController(null, equipmentManager)))
                 .WithWebApi("/api/v1/mount", m => m.WithController(() => new MountRouteController(null, equipmentManager)))
