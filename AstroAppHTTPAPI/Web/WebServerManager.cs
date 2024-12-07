@@ -6,13 +6,11 @@ using NINA.Core.Utility.Notification;
 using Plugin.NINA.AstroAppHTTPAPI.Equipment;
 using System;
 using System.Linq;
-using System.Threading;
-using System.Timers;
 using System.Net.NetworkInformation;
 using System.Security.Cryptography.X509Certificates;
-using System.Configuration;
-using EmbedIO.Files;
 using System.Text;
+using System.Threading;
+using System.Timers;
 
 namespace Plugin.NINA.AstroAppHTTPAPI.Web {
 
@@ -29,7 +27,7 @@ namespace Plugin.NINA.AstroAppHTTPAPI.Web {
         private string certificatePath;
         private string certificatePassword;
 
-        public WebServerManager(int port, bool useHttps, string apiKey, EquipmentManager equipmentManager, 
+        public WebServerManager(int port, bool useHttps, string apiKey, EquipmentManager equipmentManager,
             string certificatePath, string certificatePassword) {
             this.port = port;
             this.equipmentManager = equipmentManager;
@@ -41,9 +39,9 @@ namespace Plugin.NINA.AstroAppHTTPAPI.Web {
 
         private void CreateServer() {
             webSocketHandler = new WebSocketHandler("/events/v1", equipmentManager, apiKey);
-            
+
             var urlPrefix = useHttps ? $"https://*:{port}" : $"http://*:{port}";
-            
+
             var options = new WebServerOptions()
                 .WithUrlPrefix(urlPrefix)
                 .WithMode(HttpListenerMode.EmbedIO);
@@ -64,10 +62,6 @@ namespace Plugin.NINA.AstroAppHTTPAPI.Web {
                 .WithModule(new CorsModule("/", "*", "*", "*"))
                 .WithModule(webSocketHandler)
                 .WithModule(new BasicAuthenticationModule("/api").WithAccount("user", apiKey))
-                .WithAction("/", HttpVerbs.Get, ctx => {
-                    ctx.Response.ContentType = "text/html";
-                    return ctx.SendStringAsync(StaticContent.GetIndexHtml(), "text/html", Encoding.UTF8);
-                })
                 .WithWebApi("/api/v1/camera", m => m.WithController(() => new CameraRouteController(null, equipmentManager)))
                 .WithWebApi("/api/v1/dome", m => m.WithController(() => new DomeRouteController(null, equipmentManager)))
                 .WithWebApi("/api/v1/mount", m => m.WithController(() => new MountRouteController(null, equipmentManager)))
@@ -77,8 +71,11 @@ namespace Plugin.NINA.AstroAppHTTPAPI.Web {
                 .WithWebApi("/api/v1/filterwheel", m => m.WithController(() => new FilterWheelRouteController(null, equipmentManager)))
                 .WithWebApi("/api/v1/flatdevice", m => m.WithController(() => new FlatDeviceRouteController(null, equipmentManager)))
                 .WithWebApi("/api/v1/safetymonitor", m => m.WithController(() => new SafetyMonitorController(null, equipmentManager)))
-                .WithWebApi("/api/v1/weather", m => m.WithController(() => new WeatherRouteController(null, equipmentManager)));
-            
+                .WithWebApi("/api/v1/weather", m => m.WithController(() => new WeatherRouteController(null, equipmentManager)))
+                .WithAction("/", HttpVerbs.Any, ctx => {
+                    ctx.Response.ContentType = "text/html";
+                    return ctx.SendStringAsync(StaticContent.GetIndexHtml(), "text/html", Encoding.UTF8);
+                });
             UpdateServerUrls();
         }
 
@@ -91,9 +88,9 @@ namespace Plugin.NINA.AstroAppHTTPAPI.Web {
                     .Where(x => x.Address.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
                     .Select(x => $"{protocol}://{x.Address}:{port}")
                     .ToList();
-                    
+
                 ServerUrls = string.Join("\n", addresses);
-                
+
                 // Add localhost if not already included
                 if (!addresses.Any(x => x.Contains("127.0.0.1"))) {
                     ServerUrls = $"{protocol}://127.0.0.1:{port}\n" + ServerUrls;
@@ -172,19 +169,17 @@ namespace Plugin.NINA.AstroAppHTTPAPI.Web {
 
         }
 
-        private X509Certificate2 GetCertificate() 
-        {
+        private X509Certificate2 GetCertificate() {
             try {
                 if (string.IsNullOrEmpty(certificatePath)) {
                     throw new Exception("No certificate path specified");
                 }
 
                 return new X509Certificate2(
-                    certificatePath, 
+                    certificatePath,
                     certificatePassword ?? ""
                 );
-            }
-            catch (Exception ex) {
+            } catch (Exception ex) {
                 throw new Exception($"Failed to load certificate: {ex.Message}");
             }
         }
