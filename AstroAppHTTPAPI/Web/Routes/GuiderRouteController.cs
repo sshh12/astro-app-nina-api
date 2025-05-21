@@ -1,11 +1,24 @@
 using EmbedIO;
 using EmbedIO.Routing;
+using EmbedIO.WebApi;
 using Plugin.NINA.AstroAppHTTPAPI.Equipment;
 using System.Threading.Tasks;
 using NINA.Equipment.Equipment.MyGuider;
 using System;
 
 namespace Plugin.NINA.AstroAppHTTPAPI.Web {
+
+    public enum GuiderDirection {
+        North,
+        South,
+        East,
+        West
+    }
+
+    public class PulseGuideRequest {
+        public GuiderDirection Direction { get; set; }
+        public int Duration { get; set; }
+    }
 
     public class GuiderStatusResponse {
         public string Type = "GuiderStatus";
@@ -55,5 +68,14 @@ namespace Plugin.NINA.AstroAppHTTPAPI.Web {
             await RespondWithJSON(response);
         }
 
+        [Route(HttpVerbs.Post, "/pulseguide")]
+        public async Task GuiderPulseGuide([JsonData] PulseGuideRequest request) {
+            await equipmentManager.MountPulseGuide(request.Direction, request.Duration);
+            var info = equipmentManager.GuiderInfo();
+            // Using GuiderAction.NONE for now as there isn't a specific action for pulse guiding.
+            // A more specific action like GUIDING_PULSED could be added to GuiderAction enum later if needed.
+            var response = GuiderStatusResponse.FromGuiderInfo(info, GuiderAction.NONE);
+            await RespondWithJSON(response);
+        }
     }
 }
