@@ -20,6 +20,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using NINA.Astrometry;
 using NINA.Equipment.Model;
+using Plugin.NINA.AstroAppHTTPAPI.Web;
+using NINA.Equipment.Interfaces.Guiding;
+using NINA.Equipment.Interfaces;
 
 namespace Plugin.NINA.AstroAppHTTPAPI.Equipment {
 
@@ -735,6 +738,31 @@ namespace Plugin.NINA.AstroAppHTTPAPI.Equipment {
                 mount.SetTrackingMode(mode);
             }
             await Task.CompletedTask;
+        }
+
+        public async Task MountPulseGuide(GuiderDirection direction, int duration) {
+            if (mount.GetInfo().Connected) {
+                NINA.Equipment.Interfaces.Guiding.PulseGuideDirection ninaDirection;
+                switch (direction) {
+                    case Web.GuiderDirection.North:
+                        ninaDirection = NINA.Equipment.Interfaces.Guiding.PulseGuideDirection.North;
+                        break;
+                    case Web.GuiderDirection.South:
+                        ninaDirection = NINA.Equipment.Interfaces.Guiding.PulseGuideDirection.South;
+                        break;
+                    case Web.GuiderDirection.East:
+                        ninaDirection = NINA.Equipment.Interfaces.Guiding.PulseGuideDirection.East;
+                        break;
+                    case Web.GuiderDirection.West:
+                        ninaDirection = NINA.Equipment.Interfaces.Guiding.PulseGuideDirection.West;
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException(nameof(direction), $"Unsupported guider direction: {direction}");
+                }
+
+                await mount.PulseGuide(ninaDirection, duration);
+                MountUpdated?.Invoke(this, new MountEventArgs(MountAction.NONE));
+            }
         }
 
         public async Task CameraCapture(double exposureTime) {
